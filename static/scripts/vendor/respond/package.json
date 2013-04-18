@@ -1,0 +1,18 @@
+{
+    "name": "respond",
+    "version": "1.0.0",
+    "description": "A fast & lightweight polyfill for min/max-width CSS3 Media Queries (for IE 6-8, and more)",
+    "keywords" : [ "media queries", "adaptive design", "responsive design", "old IE", "degradation", "IE6", "IE7", "IE8", "CSS3" ],
+    "author": {
+        "name": "scottjehl"
+    },
+    "homepage": "https://github.com/scottjehl/Respond/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/scottjehl/Respond.git"
+    },
+    "bugs": {
+        "web": "https://github.com/scottjehl/Respond/issues"
+    },
+    "main": "respond.min.js"
+}

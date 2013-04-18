@@ -1,0 +1,17 @@
+{
+    "name": "console-log",
+    "version": "1.0.0",
+    "description": "Disables console.log for old browsers",
+    "keywords": [ "old browsers", "IE", "console.log" ],
+    "author": {
+        "name": "HTML5 Boilerplate"
+    },
+    "homepage": "http://html5boilerplate.com/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/h5bp/html5-boilerplate.git"
+    },
+    "bugs": {
+        "web": "https://github.com/h5bp/html5-boilerplate/issues"
+    }
+}

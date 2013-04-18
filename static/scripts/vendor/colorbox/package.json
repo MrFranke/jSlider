@@ -1,0 +1,21 @@
+{
+    "name": "colorbox",
+    "version": "1.3.20",
+    "description": "A lightweight customizable lightbox plugin for jQuery",
+    "keywords": [ "lightbox", "window", "jquery plugin", "modal", "popup" ],
+    "main": "jquery.colorbox.js",
+    "author": {
+        "name": "Jack Moore"
+    },
+    "homepage": "http://www.jacklmoore.com/colorbox",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jackmoore/colorbox.git"
+    },
+    "bugs": {
+        "web": "https://github.com/jackmoore/colorbox/issues"
+    },
+    "dependencies": {
+        "jquery": ">1.4.2"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "name": "js-error-log",
+    "version": "1.0.0",
+    "description": "Disables standart browser error dialogues and sends information about JS errors to server.",
+    "keywords": [ "JavaScripts", "JS", "onerror", "errors" ],
+    "author": {
+        "name": "vkotiya@rbc.ru"
+    }
+}
