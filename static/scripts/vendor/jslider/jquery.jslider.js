@@ -358,15 +358,25 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( !isVisable ) {
                     var itemImage = new Image()
                     itemImage.src = $previewItems.first().find('img').attr('src');
-                    itemWidth = itemImage.height;
+
+                    // Для хрома обязательно нужно дождаться загрузки картинки
+                    itemImage.onload = function () {
+                        itemWidth = itemImage.height;
+
+                        move();
+
+                        return marginLeft;
+                    }
                 }
 
-                marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
-                marginLeft = marginLeft.toFixed(0);
+                (function move () {
+                    marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
+                    marginLeft = marginLeft.toFixed(0);
 
-                $previewItems.css({
-                    marginLeft: marginLeft + 'px'
-                });
+                    $previewItems.css({
+                        marginLeft: marginLeft + 'px'
+                    });
+                })();
 
                 return marginLeft;
             }
@@ -387,16 +397,26 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( !isVisable ) {
                     var itemImage = new Image()
                     itemImage.src = $previewItems.first().find('img').attr('src');
-                    itemHeight = itemImage.height;
+
+                    // Для хрома обязательно нужно дождаться загрузки картинки
+                    itemImage.onload = function () {
+                        itemHeight = itemImage.height;
+
+                        move();
+
+                        return marginTop;
+                    }
                 }
 
-                marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
-                marginTop = marginTop.toFixed(0);
+                (function move () {
+                    marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
+                    marginTop = marginTop.toFixed(0);
 
 
-                $previewItems.css({
-                    marginTop: marginTop + 'px'
-                });
+                    $previewItems.css({
+                        marginTop: marginTop + 'px'
+                    });   
+                })();
 
                 return marginTop;
             }
@@ -836,6 +856,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
             newLast = $items.eq( newLastIndex );
             newFirst = $items.eq( newFirstIndex );
+
 
             lastNfirstElObj.first = newFirst;
             lastNfirstElObj.last = newLast;
