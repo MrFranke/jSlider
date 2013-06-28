@@ -104,7 +104,10 @@ $.fn.jSlider = function( options, verticalDirection ) {
             if ( settings.pagination ) { pagination.init(); } // Инициализируем пагинацию
             if ( settings.fullscreen ) { fullscreen.init(); } // Инициализируем fullscreen
 
-            changeActiveElement( indexActiveItem ); // Если при загрузке страницы активный элемент не 1й
+            // TODO: если слайдер скрыт, неправильно считает положение всего списка (список уезжает вверх)
+            if ( isVisable ) {
+                changeActiveElement( indexActiveItem ); // Если при загрузке страницы активный элемент не 1й
+            }
         }
 
         
@@ -358,25 +361,15 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( !isVisable ) {
                     var itemImage = new Image()
                     itemImage.src = $previewItems.first().find('img').attr('src');
-
-                    // Для хрома обязательно нужно дождаться загрузки картинки
-                    itemImage.onload = function () {
-                        itemWidth = itemImage.height;
-
-                        move();
-
-                        return marginLeft;
-                    }
+                    itemWidth = itemImage.height;                        
                 }
 
-                (function move () {
-                    marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
-                    marginLeft = marginLeft.toFixed(0);
+                marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
+                marginLeft = marginLeft.toFixed(0);
 
-                    $previewItems.css({
-                        marginLeft: marginLeft + 'px'
-                    });
-                })();
+                $previewItems.css({
+                    marginLeft: marginLeft + 'px'
+                });
 
                 return marginLeft;
             }
@@ -397,26 +390,16 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( !isVisable ) {
                     var itemImage = new Image()
                     itemImage.src = $previewItems.first().find('img').attr('src');
-
-                    // Для хрома обязательно нужно дождаться загрузки картинки
-                    itemImage.onload = function () {
-                        itemHeight = itemImage.height;
-
-                        move();
-
-                        return marginTop;
-                    }
+                    itemHeight = itemImage.height;
                 }
 
-                (function move () {
-                    marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
-                    marginTop = marginTop.toFixed(0);
+                marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
+                marginTop = marginTop.toFixed(0);
 
 
-                    $previewItems.css({
-                        marginTop: marginTop + 'px'
-                    });   
-                })();
+                $previewItems.css({
+                    marginTop: marginTop + 'px'
+                });   
 
                 return marginTop;
             }
