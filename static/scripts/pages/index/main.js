@@ -12,7 +12,6 @@ define([
               animation: true
             , slideOnLastFirstEl: true
             , visableElements: 3
-            , pagination: true
             , activEl: 1
             , fullscreen: true
         });

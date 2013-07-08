@@ -68,7 +68,7 @@ define([ 'jquery' ], function( jQuery ) {
 (function( $ ) {
 
 $.fn.jSlider = function( options, verticalDirection ) {
-    
+
     var settings = $.extend( {
                 SLIDER_CSS_CLASS: 'js-slider' // Класс для слайдера. Если такой класс уже есть, его можно переопределить
               , animation: false  // Анимирует перелистывание картинок
@@ -86,17 +86,18 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
         }, options);
 
-    
+
     // Создаем класс для слайдера
     var Slider = function ( $slider, VERTICAL ) {
-        
+
         // Первый и последний элементы превью в видимой области и индекс активной картинки
         var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
           , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length
           , VERTICAL = VERTICAL
           , isVisable = $slider.is(':visible')
-        
-        
+          ;
+
+
         // Инициализируем все модули для слайдера
         function init () {
             if ( settings.review ) { review.init(); } // Инициализируем сам слайдер
@@ -110,7 +111,6 @@ $.fn.jSlider = function( options, verticalDirection ) {
             }
         }
 
-        
 
 
         /**
@@ -160,7 +160,110 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     disableRotator();
                 }
 
-                $previewItems.bind('click.slider.rotator', click);
+                bindMobileEvent();
+
+                $previewItems.on('click.slider.rotator, tap.slider.rotator', click);
+            }
+
+            /**
+             * Вешает события для тачскринов
+             */
+            function bindMobileEvent () {
+                var direction = verticalDirection? 'top' : 'left'
+                  , size = verticalDirection? 'height' : 'width'
+                  , offset = 0
+                  
+                  , startTime   // Время начала жеста
+                  , startPoint  // Точка положения списка превью на начало жеста
+                  ;
+
+
+                $preview.on('touchstart.slider.review, mousedown.slider.review', touchStart);
+                $preview.on('touchmove.slider.review', touchMove);
+                $preview.on('touchend.slider.review, mouseup.slider.review', touchEnd);
+
+                function touchStart (e) {
+                    var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent;
+
+                    startTime = new Date().getTime();
+                    startPoint = parseInt($preview.css( direction ), 10);
+
+                    offset = verticalDirection? eventObj.clientY : eventObj.clientX;
+
+                    $(document).on('mousemove.slider.review', touchMove);
+                    $(document).on('mouseup.slider.review', touchEnd);
+                    return false;
+                }
+
+                function touchMove ( e ) {
+                    var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
+                      , currentOffset = verticalDirection? eventObj.clientY : eventObj.clientX
+                      , distance = parseInt($preview.css( direction ), 10)
+                      , newOffset = 0;
+
+                    newOffset = offset - currentOffset;
+                    offset = currentOffset;
+
+                    $preview.css(direction, distance - newOffset);
+                    e.preventDefault();
+                    return false;
+                }
+
+                function touchEnd (e) {
+                    var offsetList = parseInt($preview.css( direction ), 10)
+                      , $checkEl = numItems > 1? $previewItems.eq(1) : $previewItems.eq(0)
+                      , itemSize = direction === 'left'? $checkEl.outerWidth(true) : $checkEl.outerHeight(true)
+                      , activIndex = Math.round(-offsetList/itemSize)
+
+                      // Переменные для инерции
+                      , MASS = 100
+                      , stopTime = new Date().getTime() // Время остановки жеста
+                      , stopPoint = parseInt($preview.css( direction ), 10) // Точка остановки жеста
+                      , duration = stopTime - startTime
+                      , distance = stopPoint - startPoint
+                      , speed = distance/duration
+                      , impulse = MASS*speed
+                      , anim = {}
+                      ;
+
+                    $(document).off('mousemove.slider.review', touchMove);
+                    $(document).off('mouseup.slider.review', touchEnd);
+                    
+                    // Если переместили превью за границу, возвращаем их обратно
+                    if ( activIndex <= 0 || activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
+                        
+                        if ( activIndex <= 0 ) {
+                            checkActiveOverBounds(0);
+                            return;
+                        }
+
+                        if ( activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
+                            checkActiveOverBounds(numItems-1);
+                            return;
+                        }
+
+                    // Продолжает движение по инерции
+                    }else{
+                        anim[direction] = '+='+impulse+'px';
+                        $preview.animate(anim, MASS, function () {
+                            offsetList = parseInt($preview.css( direction ), 10);
+                            activIndex = Math.round(-offsetList/itemSize);
+                            
+
+                            if ( activIndex <= 0 ) {
+                                checkActiveOverBounds(0);
+                                return;
+                            }
+
+                            if ( activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
+                                checkActiveOverBounds(numItems-1);
+                                return;
+                            }
+
+                        });
+                    }
+                
+                }
             }
 
             /**
@@ -209,11 +312,12 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( !settings.slideOnLastFirstEl ) {return false;}
 
                 var item = typeof item !== 'number' ? item : $previewItems.eq( item );
-                if ( item.get(0) === lastOrFirstRotatorItems.first.get(0) ) { 
+
+                if ( item.get(0) === lastOrFirstRotatorItems.first.get(0) ) {
                     move(-1);
                 }
-                if ( item.get(0) === lastOrFirstRotatorItems.last.get(0) ) { 
-                    move(1); 
+                if ( item.get(0) === lastOrFirstRotatorItems.last.get(0) ) {
+                    move(1);
                 }
             }
 
@@ -230,7 +334,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
                   , offset = Math.floor( settings.visableElements/2 ) // Средний видимый элемент
                   , diff = f-i; // То, на сколько нужно прокрутить превью, что бы активный элемент был виден 
 
-                if ( i > l || i < f ) {
+                if ( i >= l || i <= f ) {
                     if (VERTICAL) {
                         move( -diff );
                         return;
@@ -441,23 +545,111 @@ $.fn.jSlider = function( options, verticalDirection ) {
             function bindEvents () {
                 // Вешаем события только если слайдев больше 1, иначе дизейблим стрелки
                 if ( shouldMove() ) {
-                    $next.bind('click.slider.review', function () {
+                    $next.on('click.slider.review, tap.slider.review', function () {
                        changeActiveElement( indexActiveItem+1 );
                        review.stopAutoRatating(); // Останавливаем автоматическое вращение
                     });
-                    $prev.bind('click.slider.review', function () {
+                    $prev.on('click.slider.review, tap.slider.review', function () {
                         changeActiveElement( indexActiveItem-1 );
                         review.stopAutoRatating(); // Останавливаем автоматическое вращение
                     });
+
                 } else {
                     disableSlider();
                 }
+
+                bindMobileEvent();
             }
+
+            /**
+             * Вешает события для тачскринов
+             */
+            function bindMobileEvent () {
+                var direction = verticalDirection? 'top' : 'left'   // Вертикальный или горизонтальный слайдер
+                  , size = verticalDirection? 'height' : 'width'    // Вертикальный или горизонтальный слайдер
+                  , offset = 0  //Изначальный отступ списка с картинками
+                  , motionStart   // Точка начала движения
+                  , motionDirection;
+
+
+                $reviewItems.on('touchstart.slider.review, mousedown.slider.review', touchStart);
+
+                function touchStart (e) {
+                    var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
+                    offset = motionStart = verticalDirection? eventObj.clientY : eventObj.clientX;
+                    motionDirection = null;
+
+                    $(document).on('touchmove.slider.review, mousemove.slider.review', touchMove);
+                    $(document).on('touchend.slider.review, mouseup.slider.review', touchEnd);
+                    e.preventDefault();
+                }
+
+                function touchMove ( e ) {
+                    var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
+                      , currentOffset = verticalDirection? eventObj.clientY : eventObj.clientX
+                      , distance = parseInt($review.css( direction ), 10)
+                      , mewMotionDirection
+                      , newOffset = 0;
+
+                    newOffset = offset - currentOffset;
+                    
+                    mewMotionDirection = newOffset >= 0 ? 'next' : 'prev';
+                    
+                    // Если мы меням напровления во время перетаскивания мы возврощаем элемент
+                    if ( !motionDirection ) {
+                        motionDirection = mewMotionDirection;
+                    }else if ( motionDirection && motionDirection !== mewMotionDirection ) {
+                        motionDirection = 'revert';
+                    }
+
+                    offset = currentOffset;
+                    $review.css(direction, distance - newOffset);
+
+                    e.preventDefault();
+                }
+
+                function touchEnd (e) {
+                    var activIndex = activeElIndex;
+
+                    switch(motionDirection){
+                        case 'prev':
+                            activIndex = activeElIndex - 1;
+                            break;
+                        case 'next':
+                            activIndex = activeElIndex + 1;
+                            break;
+                        default:
+                            activIndex = activeElIndex;
+                            break;
+                    }
+
+                    activIndex = activIndex < 0 ? 0 : activIndex;
+                    activIndex = activIndex > numItems-1 ? numItems-1 : activIndex;
+
+                    changeActiveElement(activIndex);
+
+                    $(document).off('touchmove.slider.review, mousemove.slider.review');
+                    $(document).off('touchend.slider.review, mouseup.slider.review');
+                    e.preventDefault();
+                }
+
+                /**
+                 * Возвращает напровление движения курсора в одной плоскости
+                 * @param start {Number} координаты начала движения
+                 * @param end {Number} координаты окончания движения
+                 * @returns {String} 'prev'/'next' в зависиот напровления движения
+                 */
+                function cursorMotionVector (start, end) {
+                    return start < end ? 'prev' : 'next';
+                }
+            }
+
 
             function disableSlider () {
                 $prev.addClass('disable');
                 $next.addClass('disable');
             }
+
             /**
              * Если элеменов меньше чем должно быть в видимой области, возвращаем false
              */
@@ -656,7 +848,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
              * @returns $lastItem {Object} jQuery объект. Последний видимый элемент
              */
             function searchVisableEl () {
-                var $item = $items.eq(1)
+                var itemsLength = $items.length
+                  , $item = $items.eq( itemsLength > 1 ? 1 : 0 )
                   , margin = parseInt( $item.css('marginLeft'), 10)
                   , itemWidth = $item.width() + margin
                   , paginatorWidth = $overflow.width()
