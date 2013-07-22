@@ -71,7 +71,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
     var settings = $.extend( {
                 SLIDER_CSS_CLASS: 'js-slider' // Класс для слайдера. Если такой класс уже есть, его можно переопределить
-              , animation: false  // Анимирует перелистывание картинок
+              , animation: true  // Анимирует перелистывание картинок
               , autoRatating: false     // Автоматическое перелистывание (принимает значение в миллисекундах)
               , activEl: 1              // Элемент, который будет активным при инициализации слайдера
               , alignment: !verticalDirection // Автоматическое выравниывние элементов (все превью должны быть одинаковы)
@@ -83,6 +83,11 @@ $.fn.jSlider = function( options, verticalDirection ) {
               , slideOnLastFirstEl: !verticalDirection // Крутит слайдер при нажатии на крайние элементы
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
               , fullscreen: false    // Инициализация colorbox'a. Можно передать объект настроек colorbox'a
+              , motionlessPreview: false // Если true, то превью не перемещается
+
+
+              , preloadCallback: null // Функция, которая вызывается сразу после инициализации слайдера
+              , changeActiveElCallback: null // Функция, которая вызывается во время смены активного элемента
 
         }, options);
 
@@ -109,6 +114,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
             if ( isVisable ) {
                 changeActiveElement( indexActiveItem ); // Если при загрузке страницы активный элемент не 1й
             }
+
+            if ( settings.preloadCallback ) { settings.preloadCallback($slider); }
         }
 
 
@@ -192,6 +199,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                     $(document).on('mousemove.slider.review', touchMove);
                     $(document).on('mouseup.slider.review', touchEnd);
+
+                    review.stopAutoRatating(); // Останавливаем автоматическое вращение
                     return false;
                 }
 
@@ -351,7 +360,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
              * @private
              */
             function move ( step ) {
-
+                if ( settings.motionlessPreview ) { return false; }
                 if ( VERTICAL ) {
                     moveVertical( step );
                 } else {
@@ -581,6 +590,9 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                     $(document).on('touchmove.slider.review, mousemove.slider.review', touchMove);
                     $(document).on('touchend.slider.review, mouseup.slider.review', touchEnd);
+                    
+                    review.stopAutoRatating(); // Останавливаем автоматическое вращение
+
                     e.preventDefault();
                 }
 
@@ -689,6 +701,10 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 if ( typeof settings.animation === 'function' ) {
                     settings.animation.apply( this, [$review, $el, diff, index] );
                     return false;
+                }
+
+                if ( VERTICAL ) {
+                    $review.animate({ top: -$el.position().top });
                 }
                 
                 // Если нужно переместить изображение больше чем на 5 слайдев,
@@ -988,6 +1004,10 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
             if ( settings.review ) {
                 review.move( index );                  // Меняем картинку
+            }
+
+            if ( settings.changeActiveElCallback ) {
+                settings.changeActiveElCallback( $slider, index ); // Запускаем callback и передаем туда индекс нового активного элемента
             }
 
             indexActiveItem = index; // Меняем активный элемент в слайдере

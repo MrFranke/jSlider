@@ -9,8 +9,7 @@ define([
     function init() {
 
         $('.slider').jSlider({
-              animation: true
-            , slideOnLastFirstEl: true
+              slideOnLastFirstEl: true
             , visableElements: 3
             , activEl: 1
             , fullscreen: true
@@ -18,10 +17,7 @@ define([
 
 
         $('.slider__vertical').jSlider({
-              animation: function ( $list, $activeEl, diff, newIndex ) {
-                  $list.animate({ top: -$activeEl.position().top });
-              }
-            , visableElements: 3
+              visableElements: 3
             , step: 3
             , alignment: true
             , slideOnLastFirstEl: true
