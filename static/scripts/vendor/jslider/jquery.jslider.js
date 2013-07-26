@@ -138,7 +138,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
               , lastOrFirstRotatorItems = {
                   first: $previewItems.eq(0)
                 , last: $previewItems.eq( settings.visableElements-1 )
-            };
+              }
+              , notClick = false;
              
             function init () {                
                 // Выравнивание элементов превью по ширине видимой области
@@ -214,7 +215,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     offset = currentOffset;
 
                     $preview.css(direction, distance - newOffset);
-                    e.preventDefault();
+                    notClick = true;
                     return false;
                 }
 
@@ -235,10 +236,14 @@ $.fn.jSlider = function( options, verticalDirection ) {
                       , anim = {}
                       ;
 
+
+                    // Если имульс слишком мал, то не создаем инерцию
+                    if ( Math.abs(impulse) < 100 ) {impulse = 0;}
+
                     $(document).off('mousemove.slider.review', touchMove);
                     $(document).off('mouseup.slider.review', touchEnd);
                     
-                    // Если переместили превью за границу, возвращаем их обратно
+                    // Если переместили превью за границу, возвращаем их обратно без инерции
                     if ( activIndex <= 0 || activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
                         
                         if ( activIndex <= 0 ) {
@@ -255,6 +260,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     }else{
                         anim[direction] = '+='+impulse+'px';
                         $preview.animate(anim, MASS, function () {
+                            notClick = false; // Возвращаем возможность выбрать картинку после анимации
                             offsetList = parseInt($preview.css( direction ), 10);
                             activIndex = Math.round(-offsetList/itemSize);
                             
@@ -271,7 +277,6 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                         });
                     }
-                
                 }
             }
 
@@ -293,6 +298,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
              * @private
              */
             function click () {
+                if ( notClick ) {return false;}
                 var i = $(this).index();
                 changeActiveElement( i ); // Меняет картинку
                 changeCurrentEl( i )
@@ -324,9 +330,11 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                 if ( item.get(0) === lastOrFirstRotatorItems.first.get(0) ) {
                     move(-1);
+                    return;
                 }
                 if ( item.get(0) === lastOrFirstRotatorItems.last.get(0) ) {
                     move(1);
+                    return;
                 }
             }
 
@@ -403,6 +411,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                 $preview.animate({
                     left: -positionItem
+                }, function () {
+                    notClick = false; // Возвращаем возможность кликать
                 });
             }
 
@@ -440,6 +450,8 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                 $preview.animate({
                     top: -positionItem
+                }, function () {
+                    notClick = false; // Возвращаем возможность кликать
                 });
             }
 
