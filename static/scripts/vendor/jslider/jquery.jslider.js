@@ -10,6 +10,10 @@
     </div>
 
     <div class="slider-big_images-wrapper">            
+        // Стрелки слайдера
+        <div class="slider-big_images-nav slider-big_images-nav-prev js-slider_review_prev"></div>
+        <div class="slider-big_images-nav slider-big_images-nav-next js-slider_review_next "></div>
+
         <div class="slider-big_images-overflow js-slider_review_overflow">
             <ul class="slider-big_images js-slider_review">
                 
@@ -157,10 +161,12 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     $next.bind('click.slider.rotator', function () {
                         move( settings.step );
                         review.stopAutoRatating(); // Останавливаем автоматическое вращение
+                        return false;
                     });
                     $prev.bind('click.slider.rotator', function () {
                         move( -settings.step );
                         review.stopAutoRatating(); // Останавливаем автоматическое вращение
+                        return false;
                     });
                 
                 // Если превью не нужно листать дизейблим стрелки
@@ -303,6 +309,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 changeActiveElement( i ); // Меняет картинку
                 changeCurrentEl( i )
                 review.stopAutoRatating(); // Останавливаем автоматическое вращение
+                return false;
             }
 
             /**
@@ -482,11 +489,12 @@ $.fn.jSlider = function( options, verticalDirection ) {
                   , previewsWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').width()
                   , marginLeft
                   , marginLeft
+                  , src = $previewItems.first().find('img').attr('src');
 
-                if ( !isVisable ) {
-                    var itemImage = new Image()
-                    itemImage.src = $previewItems.first().find('img').attr('src');
-                    itemWidth = itemImage.height;                        
+                if ( !isVisable && src ) {
+                    var itemImage = new Image();
+                    itemImage.src = src;
+                    itemWidth = itemImage.height;
                 }
 
                 marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
@@ -553,9 +561,18 @@ $.fn.jSlider = function( options, verticalDirection ) {
               , reviewWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_overflow').width() // Записываем ширину списка превью и картинок
               , interval = false
               , activeElIndex = indexActiveItem
+              , $firstEl = $reviewItems.first()
+              , allElSize = verticalDirection? $firstEl.height() : $firstEl.width() // Ширина всех картинок в списке
+              ;
+            allElSize *= numItems;
              
             function init () {
-                $reviewItems.width(reviewWidth); // Делаем ширину контейнера с картинкой равной ширине слайдера
+                var src = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_overflow img').attr('src')
+                  , img = new Image()
+                img.src = src;
+
+                // Делаем ширину контейнера с картинкой равной ширине слайдера. Если картинка больше контейнера, то выравниваем контейнер по ширине картинки
+                $reviewItems.width(img.width > reviewWidth && img.width);
                 bindEvents();
 
                 if ( settings.autoRatating ) {
@@ -569,10 +586,12 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     $next.on('click.slider.review, tap.slider.review', function () {
                        changeActiveElement( indexActiveItem+1 );
                        review.stopAutoRatating(); // Останавливаем автоматическое вращение
+                       return false;
                     });
                     $prev.on('click.slider.review, tap.slider.review', function () {
                         changeActiveElement( indexActiveItem-1 );
                         review.stopAutoRatating(); // Останавливаем автоматическое вращение
+                        return false;
                     });
 
                 } else {
@@ -613,9 +632,11 @@ $.fn.jSlider = function( options, verticalDirection ) {
                       , currentOffset = verticalDirection? eventObj.clientY : eventObj.clientX
                       , distance = parseInt($review.css( direction ), 10)
                       , mewMotionDirection
+                      , newLeftPosition
                       , newOffset = 0;
 
                     newOffset = offset - currentOffset;
+                    newLeftPosition = distance - newOffset;
                     
                     mewMotionDirection = newOffset >= 0 ? 'next' : 'prev';
                     
@@ -627,7 +648,13 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     }
 
                     offset = currentOffset;
-                    $review.css(direction, distance - newOffset);
+                    if  (   newLeftPosition*-1 < reviewWidth/-2
+                         || newLeftPosition < -(allElSize - reviewWidth/2)
+                        ) {
+                        return false;
+                    }
+
+                    $review.css(direction, newLeftPosition);
 
                     e.preventDefault();
                 }
@@ -1082,13 +1109,15 @@ $.fn.jSlider = function( options, verticalDirection ) {
         var API = {
               stopAutoRatating: settings.review ? review.stopAutoRatating : function () {return null}
             , startAutoRatating: settings.review ? review.autoRatating : function () {return null}
+            , changeActiveElement: changeActiveElement
+            , $el: $slider
         }
 
         return API;
 
     }
 
-    var setOfSlider = []; // Массив из возвращаемых слайдеров 
+    var setOfSlider = new APIStack; // Массив из возвращаемых слайдеров 
 
     // Проходимся по всем элементам и создаем слайдер для каждого
     this.each(function () {
@@ -1102,6 +1131,27 @@ $.fn.jSlider = function( options, verticalDirection ) {
     return setOfSlider.length === 1? setOfSlider[0] : setOfSlider;
 
 };
+
+
+/**
+ * Функция для поиска API для нужного слайдера.
+ * @param $slider {Object} Объект jQuery или DOMNode элемент
+ */
+function getCurrentAPI ($slider) {
+    var slider = $slider.get? $slider.get(0) : $slider;
+    for (var i = 0; i < this.length; i++) {
+        if ( this[i].$el.get(0) === slider ) {
+            return this[i];
+        }
+    }
+    return null;
+}
+
+// Объект для ъранения всех API слайдеров
+APIStack = function () {};
+APIStack.prototype = Array.prototype;
+APIStack.prototype.getCurrentAPI = getCurrentAPI;
+
 })(jQuery);
 
 

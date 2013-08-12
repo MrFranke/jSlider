@@ -2057,11 +2057,6 @@ var jam = {
             "main": "jquery.colorbox.js"
         },
         {
-            "name": "jslider",
-            "location": "vendor/jslider",
-            "main": "jquery.jslider.js"
-        },
-        {
             "name": "jquery",
             "location": "vendor/jquery",
             "main": "jquery.js"
