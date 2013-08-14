@@ -120,6 +120,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
             }
 
             if ( settings.preloadCallback ) { settings.preloadCallback($slider); }
+            $slider.trigger('start');
         }
 
 
@@ -1048,6 +1049,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
             if ( settings.changeActiveElCallback ) {
                 settings.changeActiveElCallback( $slider, index ); // Запускаем callback и передаем туда индекс нового активного элемента
             }
+            $slider.trigger('change');
 
             indexActiveItem = index; // Меняем активный элемент в слайдере
         }
