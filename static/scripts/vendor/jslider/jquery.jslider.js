@@ -1119,7 +1119,36 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
     }
 
+    // Объект для хранения всех API слайдеров
+    function APIStack () {
+        this.getCurrentAPI = function ($slider) {
+            var slider = $slider.get? $slider.get(0) : $slider;
+            for (var i = 0; i < this.length; i++) {
+                if ( this[i].$el.get(0) === slider ) {
+                    return this[i];
+                }
+            }
+            return null;
+        }
+    }
+
+    APIStack.prototype = Array.prototype;
+
     var setOfSlider = new APIStack; // Массив из возвращаемых слайдеров 
+
+    /**
+     * Функция для поиска API для нужного слайдера.
+     * @param $slider {Object} Объект jQuery или DOMNode элемент
+     */
+    function getCurrentAPI ($slider) {
+        var slider = $slider.get? $slider.get(0) : $slider;
+        for (var i = 0; i < this.length; i++) {
+            if ( this[i].$el.get(0) === slider ) {
+                return this[i];
+            }
+        }
+        return null;
+    }
 
     // Проходимся по всем элементам и создаем слайдер для каждого
     this.each(function () {
@@ -1132,27 +1161,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
     // Возвращаем объекты слайдера для использония их API ( Пример: $('#slider').jSlider().stopAutoRatating() )
     return setOfSlider.length === 1? setOfSlider[0] : setOfSlider;
 
-};
-
-
-/**
- * Функция для поиска API для нужного слайдера.
- * @param $slider {Object} Объект jQuery или DOMNode элемент
- */
-function getCurrentAPI ($slider) {
-    var slider = $slider.get? $slider.get(0) : $slider;
-    for (var i = 0; i < this.length; i++) {
-        if ( this[i].$el.get(0) === slider ) {
-            return this[i];
-        }
-    }
-    return null;
 }
-
-// Объект для ъранения всех API слайдеров
-APIStack = function () {};
-APIStack.prototype = Array.prototype;
-APIStack.prototype.getCurrentAPI = getCurrentAPI;
 
 })(jQuery);
 

@@ -7,7 +7,7 @@ define([
     $
 ) {
     function init() {
-        $('.slider').jSlider({
+        var API = $('.slider').jSlider({
               slideOnLastFirstEl: true
             , visableElements: 3
             , activEl: 1

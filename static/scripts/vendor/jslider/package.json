@@ -1,6 +1,6 @@
 {
     "name": "jslider",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "description": "Universal slider on jQuery",
     "keywords": [ "slider", "jquery plugin", "carousel", "images" ],
     "main": "jquery.jslider.js",
