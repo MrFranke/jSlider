@@ -38,7 +38,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
         // Первый и последний элементы превью в видимой области и индекс активной картинки
         var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
-          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length
+          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
           , VERTICAL = VERTICAL
           , isVisable = $slider.is(':visible')
           ;
@@ -74,6 +74,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
         var rotator = (function () {
             // Элементы управления превью слайдера
             var $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview')
+              , $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow')
               , $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item')
               , $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_nav_prev')
               , $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_nav_next')
@@ -81,9 +82,10 @@ $.fn.jSlider = function( options, verticalDirection ) {
                   first: $previewItems.eq(0)
                 , last: $previewItems.eq( settings.visableElements-1 )
               }
-              , notClick = false;
+              , notClick = false
+              ;
              
-            function init () {                
+            function init () {
                 // Выравнивание элементов превью по ширине видимой области
                 if ( settings.alignment ){ alignmentItems(); }
 
@@ -112,9 +114,18 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     disableRotator();
                 }
 
+                $(window).on('resize', resize);
+
                 bindMobileEvent();
 
                 $previewItems.on('click.slider.rotator, tap.slider.rotator', click);
+            }
+
+            /**
+             * Выравниваем элементы при ресайзе окна
+             */
+            function resize (e) {
+                alignmentItems();
             }
 
             /**
@@ -152,7 +163,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
                 function touchMove ( e ) {
                     var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
                       , currentOffset = verticalDirection? eventObj.clientY : eventObj.clientX
-                      , distance = parseInt($preview.css( direction ), 10)
+                      , distance = parseInt($preview.css( direction ), 10) || 0
                       , newOffset = 0;
 
                     newOffset = offset - currentOffset;
@@ -430,15 +441,29 @@ $.fn.jSlider = function( options, verticalDirection ) {
                   , $img = $previewItems.first().find('img')
                   ;
 
-                $img.load(function () {
-                    itemWidth = $previewItems.first().width();
+                
+                if ( (visableElements+1) * itemWidth > previewsWidth ) {
+                       visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                }
+
+                if ( !itemWidth ) {
+                    $img.load(function () {
+                        itemWidth = $previewItems.first().width();
+                        marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
+                        marginLeft = marginLeft.toFixed(0);
+
+                        $previewItems.css({
+                            marginLeft: marginLeft + 'px'
+                        });
+                    });
+                }else{
                     marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
                     marginLeft = marginLeft.toFixed(0);
 
                     $previewItems.css({
                         marginLeft: marginLeft + 'px'
                     });
-                });
+                }
 
                 return marginLeft;
             }
