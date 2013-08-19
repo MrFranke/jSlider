@@ -423,23 +423,21 @@ $.fn.jSlider = function( options, verticalDirection ) {
              */
             function horizontalAlignmentItems () {
                 var visableElements = settings.visableElements-1
-                  , itemWidth = $previewItems.eq(0).width()
+                  , itemWidth = $previewItems.first().width()
                   , previewsWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').width()
                   , marginLeft
                   , marginLeft
-                  , src = $previewItems.first().find('img').attr('src');
+                  , $img = $previewItems.first().find('img')
+                  ;
 
-                if ( !isVisable && src ) {
-                    var itemImage = new Image();
-                    itemImage.src = src;
-                    itemWidth = itemImage.height;
-                }
+                $img.load(function () {
+                    itemWidth = $previewItems.first().width();
+                    marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
+                    marginLeft = marginLeft.toFixed(0);
 
-                marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
-                marginLeft = marginLeft.toFixed(0);
-
-                $previewItems.css({
-                    marginLeft: marginLeft + 'px'
+                    $previewItems.css({
+                        marginLeft: marginLeft + 'px'
+                    });
                 });
 
                 return marginLeft;
@@ -453,24 +451,23 @@ $.fn.jSlider = function( options, verticalDirection ) {
              */
             function verticalAlignmentItems () {
                 var visableElements = settings.visableElements-1
-                  , itemHeight = $previewItems.eq(0).height()
+                  , itemHeight = $previewItems.first().height()
                   , previewsHeight = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').height()
+                  , $img = $previewItems.first().find('img')
                   , marginTop
+                  ;
 
-                // Если слайдер скрыт, то высчитываем ширину элемента через картинку
-                if ( !isVisable ) {
-                    var itemImage = new Image()
-                    itemImage.src = $previewItems.first().find('img').attr('src');
-                    itemHeight = itemImage.height;
-                }
+                               
+                $img.load(function () {
+                    itemWidth = $previewItems.first().height();
+                    marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
+                    marginTop = marginTop.toFixed(0);
 
-                marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
-                marginTop = marginTop.toFixed(0);
+                    $previewItems.css({
+                        marginTop: marginTop + 'px'
+                    });
+                });
 
-
-                $previewItems.css({
-                    marginTop: marginTop + 'px'
-                });   
 
                 return marginTop;
             }

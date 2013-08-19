@@ -1,21 +1,5 @@
-define([
-      'jquery'
+jQuery(document).ready(function($) {
+	$('.slider').jSlider({visableElements:3});
 
-    , 'jslider'
-    , 'colorbox'
-], function(
-    $
-) {
-    function init() {
-        var API = $('.slider').jSlider({
-              slideOnLastFirstEl: true
-            , visableElements: 3
-            , activEl: 1
-            , fullscreen: true
-        });
-    }
-
-    return {
-        init: init
-    };
+	$('.slider__vertical').jSlider({alignment: true}, true);
 });
