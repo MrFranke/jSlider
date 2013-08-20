@@ -10,14 +10,20 @@
     <title>jSlider</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
-    <link href="./static/_main.css" rel="stylesheet" />
-
-    <script src="./static/jquery/jquery.js"></script>
+    <link href="static/styles/_main.css" rel="stylesheet" />
+    
+    <script data-main="static/scripts/main" src="static/scripts/require.js"></script>
+    <script>
+        require.config({
+            baseUrl: 'static/scripts',
+            paths: {
+                jquery: 'jquery/jquery',
+            }
+        });
+    </script>
 </head>
-<body data-autorun="index">
+<body>
 
-<div id="mocha"></div>
 <div class="column">
     <div class="slider js-slider">
         <div class="slider-big_images-wrapper">
@@ -344,7 +350,5 @@
     </div>
 </div>
 
-    <script src="./static/jslider/jquery.jslider.js"></script>
-    <script src="static/main.js"></script>
 </body>
 </html>

@@ -1,6 +1,14 @@
 if ( typeof define === 'function' ) {
-    define([], function() {
+    define([
+        'jquery',
+        '../src/modules/frames', // Модуль для работы с кадрами
+        '../src/modules/preview', // Модуль для работы с превьюшками
+        '../src/modules/pagination', // Модуль для работы с пагинацией
+        '../src/modules/tests', // Модуль для работы с тестами
+        ], function($, Frames) {
+
       startSlider();
+
     });
 }else{
     startSlider();
