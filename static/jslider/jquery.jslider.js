@@ -442,13 +442,17 @@ $.fn.jSlider = function( options, verticalDirection ) {
                   ;
 
                 
-                if ( (visableElements+1) * itemWidth > previewsWidth ) {
-                       visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
-                }
+                
+                visableElements = settings.visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
 
+ 
+                // При загрузке слайдера ждем подгрузки картинок
                 if ( !itemWidth ) {
                     $img.load(function () {
                         itemWidth = $previewItems.first().width();
+                        
+                               visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                        
                         marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
                         marginLeft = marginLeft.toFixed(0);
 
