@@ -25,6 +25,7 @@ $.fn.jSlider = function( options, verticalDirection ) {
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
               , fullscreen: false    // Инициализация colorbox'a. Можно передать объект настроек colorbox'a
               , motionlessPreview: false // Если true, то превью не перемещается
+              , resizable: false
 
 
               , preloadCallback: null // Функция, которая вызывается сразу после инициализации слайдера
@@ -443,7 +444,9 @@ $.fn.jSlider = function( options, verticalDirection ) {
 
                 
                 
-                visableElements = settings.visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                if (settings.resizable) {
+                    visableElements = settings.visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                }
 
  
                 // При загрузке слайдера ждем подгрузки картинок
@@ -451,7 +454,9 @@ $.fn.jSlider = function( options, verticalDirection ) {
                     $img.load(function () {
                         itemWidth = $previewItems.first().width();
                         
-                               visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                        if (settings.resizable) {
+                            visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
+                        }
                         
                         marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
                         marginLeft = marginLeft.toFixed(0);
