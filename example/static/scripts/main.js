@@ -4,8 +4,11 @@ require([
 ], function($, jSlider) {
     $('.slider').jSlider({
         visableElements:3,
-        step:1,
-        resizable: false
+        resizable: false,
+        tests: true
     });
-    $('.slider__vertical').jSlider({alignment: true}, true);
+    $('.slider__vertical').jSlider({
+    	alignment: true,
+    	verticalDirection: true
+    });
 });
