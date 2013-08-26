@@ -9,6 +9,8 @@ define([
           , settings = slider.settings
           ;
 
+        $slider.on('jSlider.start', init);
+
         var $reviewItems
           , reviewWidth
           , allElSize
@@ -19,6 +21,7 @@ define([
           , $review
           , $prev
           , $next
+          , direction;
           ;
 
         allElSize *= numItems;
@@ -26,6 +29,7 @@ define([
         function init () {
             updateVars();
             bindEvents();
+            alignImage();
         }
 
         function updateVars () {
@@ -38,7 +42,8 @@ define([
             interval        = false;
             $review         = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review');
             $prev           = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_prev');
-            $next           = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_next');            
+            $next           = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_next');
+            direction       = settings.verticalDirection? 'top' : 'left';
         }
 
         function bindEvents () {
@@ -46,9 +51,9 @@ define([
             $slider.on('jSlider.activeElementChanged', function (e, index) {
                 move(index);
             });
-
-            $slider.on('jSlider.start', function (e) {
-
+            
+            $slider.on('jSlider.remove', function(e, index){
+                remove(index);
             });
 
             // Вешаем события только если слайдов больше 1, иначе дизейблим стрелки
@@ -65,109 +70,11 @@ define([
             } else {
                 disableSlider();
             }
-
-            bindMobileEvent();
         }
-
-        /**
-         * Вешает события для тачскринов
-         */
-        function bindMobileEvent () {
-            var direction = settings.verticalDirection? 'top' : 'left'   // Вертикальный или горизонтальный слайдер
-              , size = settings.verticalDirection? 'height' : 'width'    // Вертикальный или горизонтальный слайдер
-              , offset = 0  //Изначальный отступ списка с картинками
-              , motionStart   // Точка начала движения
-              , motionDirection;
-
-
-            $reviewItems.on('touchstart.slider.review, mousedown.slider.review', touchStart);
-
-            function touchStart (e) {
-                var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-                offset = motionStart = settings.verticalDirection? eventObj.clientY : eventObj.clientX;
-                motionDirection = null;
-
-                $(document).on('touchmove.slider.review, mousemove.slider.review', touchMove);
-                $(document).on('touchend.slider.review, mouseup.slider.review', touchEnd);
-                
-                //review.stopAutoRatating(); // Останавливаем автоматическое вращение
-                $slider.trigger('stopAutoRatating');
-
-                e.preventDefault();
-            }
-
-            function touchMove ( e ) {
-                var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-                  , currentOffset = settings.verticalDirection? eventObj.clientY : eventObj.clientX
-                  , distance = parseInt($review.css( direction ), 10)
-                  , mewMotionDirection
-                  , newLeftPosition
-                  , newOffset = 0;
-
-                newOffset = offset - currentOffset;
-                newLeftPosition = distance - newOffset;
-                
-                mewMotionDirection = newOffset >= 0 ? 'next' : 'prev';
-                
-                // Если мы меням напровления во время перетаскивания мы возврощаем элемент
-                if ( !motionDirection ) {
-                    motionDirection = mewMotionDirection;
-                }else if ( motionDirection && motionDirection !== mewMotionDirection ) {
-                    motionDirection = 'revert';
-                }
-
-                /**
-                 * Не дает утащить элемент за пределы экарна
-                 * TODO: Работает не стабильно! Пофиксить
-                 */
-                offset = currentOffset;
-                if  (   newLeftPosition*-1 < reviewWidth/-2
-                     || newLeftPosition < -(allElSize - reviewWidth/2)
-                    ) {
-                    return false;
-                }
-
-                $review.css(direction, newLeftPosition);
-
-                e.preventDefault();
-            }
-
-            function touchEnd (e) {
-                var activIndex = settings.activEl;
-
-                switch(motionDirection){
-                    case 'prev':
-                        activIndex = settings.activEl - 1;
-                        break;
-                    case 'next':
-                        activIndex = settings.activEl + 1;
-                        break;
-                    default:
-                        activIndex = settings.activEl;
-                        break;
-                }
-
-                activIndex = activIndex < 0 ? 0 : activIndex;
-                activIndex = activIndex > numItems-1 ? numItems-1 : activIndex;
-
-                slider.changeActiveElement( activIndex );
-
-                $(document).off('touchmove.slider.review, mousemove.slider.review');
-                $(document).off('touchend.slider.review, mouseup.slider.review');
-                e.preventDefault();
-            }
-
-            /**
-             * Возвращает напровление движения курсора в одной плоскости
-             * @param start {Number} координаты начала движения
-             * @param end {Number} координаты окончания движения
-             * @returns {String} 'prev'/'next' в зависиот напровления движения
-             */
-            function cursorMotionVector (start, end) {
-                return start < end ? 'prev' : 'next';
-            }
+        
+        function alignImage () {
+            $reviewItems.css({width: reviewWidth});
         }
-
 
         /**
          * Дизейблит стрелки слайдера
@@ -176,7 +83,7 @@ define([
             $prev.addClass('disable');
             $next.addClass('disable');
         }
-
+        
         /**
          * Если элеменов меньше чем должно быть в видимой области, возвращаем false
          */
@@ -240,12 +147,19 @@ define([
          * @private
          */
         function rotateAnimation (pos) {
+            var animateObj = {};
+            animateObj[ direction ] = -pos;
             
             if ( settings.animation ) {
-              $review.animate({left: -pos});
+                $review.stop(true, true);
+                $review.animate(animateObj);
             }else{
-              $review.css({left: -pos});
+                $review.css(animateObj);
             }
+        }
+        
+        function remove ( index ) {
+            $reviewItems.eq(index).remove();
         }
 
         function stopAutoRatating () {
@@ -254,8 +168,6 @@ define([
                 return true;
             }
         }
-
-        init();  // Запускаем модуль
 
         return{
               init: init

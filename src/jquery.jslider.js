@@ -1,20 +1,5 @@
 if ( typeof define === 'function' ) {
-    define([
-        'jquery',
-        '../src/modules/frames', // Модуль для работы с кадрами
-        '../src/modules/preview', // Модуль для работы с превьюшками
-        '../src/modules/pagination', // Модуль для работы с пагинацией
-        '../src/modules/tests', // Модуль для работы с тестами
-        ], function(
-          $,
-          Frames,
-          Preview,
-          Pagination,
-          Tests
-        ) {
-      startSlider();
-
-    });
+    define(['jquery'], function($) {startSlider();});
 }else{
     startSlider();
 }
@@ -22,21 +7,22 @@ if ( typeof define === 'function' ) {
 function startSlider () {
 
 $.fn.jSlider = function( options ) {
-
+        
     var settings = $.extend( {
                 SLIDER_CSS_CLASS: 'js-slider' // Класс для слайдера. Если такой класс уже есть, его можно переопределить
               , verticalDirection: false
               , animation: true  // Анимирует перелистывание картинок
               , autoRatating: false     // Автоматическое перелистывание (принимает значение в миллисекундах)
               , activEl: 1              // Элемент, который будет активным при инициализации слайдера
-              , alignment: (function(){ return !this.verticalDirection })() // Автоматическое выравниывние элементов (все превью должны быть одинаковы)
+              , alignment: !options.verticalDirection // Автоматическое выравниывние элементов (все превью должны быть одинаковы)
               , review: true
               , rotator: true
               , pagination: false
               , tests: false
+              , touch: true
               , visableElements: 4  // Колличество видимых \на странице элементов
-              , step: (function(){ return this.verticalDirection })() ? 1 : 4     // Если вертикальный слайдер, то перематываем на 1 шаг вперед (если не указанно другое)
-              , slideOnLastFirstEl: (function(){ return !this.verticalDirection })() // Крутит слайдер при нажатии на крайние элементы
+              , step: options.verticalDirection ? 1 : 4     // Если вертикальный слайдер, то перематываем на 1 шаг вперед (если не указанно другое)
+              , slideOnLastFirstEl: !options.verticalDirection // Крутит слайдер при нажатии на крайние элементы
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
               , motionlessPreview: false // Если true, то превью не перемещается
               , resizable: false
@@ -52,21 +38,23 @@ $.fn.jSlider = function( options ) {
     var Slider = function ( $slider ) {
 
         var that = this;
-        this.changeActiveElement = changeActiveElement;
-        this.stopAutoRatating = stopAutoRatating;
-        this.verticalDirection = settings.verticalDirection;
         this.settings = settings;
         this.$slider = $slider;
+
+        this.changeActiveElement = changeActiveElement;
+        this.stopAutoRatating = stopAutoRatating;
 
         // Первый и последний элементы превью в видимой области и индекс активной картинки
         var numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
           , isVisable = $slider.is(':visible')
+          , isInit = false
           ;
 
         // TODO: Придумать более надежную систему подгрузки модулей. 
         var modules = [settings.review?     '../../../src/modules/frames'     : null,
                        settings.rotator?    '../../../src/modules/preview'    : null,
                        settings.pagination? '../../../src/modules/pagination' : null,
+                       settings.touch?      '../../../src/modules/touchEvents': null,
                        settings.tests?      '../../../src/modules/tests'      : null];
 
         // Инициализируем все модули для слайдера
@@ -87,11 +75,12 @@ $.fn.jSlider = function( options ) {
 
                 // TODO: если слайдер скрыт, неправильно считает положение всего списка (список уезжает вверх)
                 if ( isVisable ) {
-                    changeActiveElement( settings.activEl-1 ); // Если при загрузке страницы активный элемент не 1й
+                    changeActiveElement( settings.activEl-1 );
                 }
 
                 if ( settings.preloadCallback ) { settings.preloadCallback($slider); }
-                $slider.trigger('jSlider.start', [this]); // Триггерим событие для работы с API
+                // Это событие запускает инициализацию всех модулей
+                $slider.trigger('jSlider.start', [this]);
             });
 
         }
@@ -114,6 +103,52 @@ $.fn.jSlider = function( options ) {
 
             interval = itl;
         }
+        
+        /*
+         * Функция ждет загрузки всех картинок в слайдере и после того как они все прогрузятся, она его запускает
+         */
+        function waitingAllImg ( callback ) {
+            var counter = 0
+              , errors = 0
+              , numImg = $slider.find('img').length
+              ;
+            
+            $slider.find('img').each(function(){
+                if ( this.complete ) {
+                    counter++;
+                    if ( counter === numImg ) {
+                        console.log('done! with complete', $slider);
+                        callback(errors, counter);
+                    }
+                    
+                }
+                
+                $(this).load(function(){
+                    counter++;
+                    $slider.trigger('jSlider.loadImage', [counter]);
+
+                    if ( counter === numImg ){
+                        console.log('done! with load', $slider);
+                        callback(errors, counter);
+                    }
+                });
+                
+                $(this).error(function(){
+                    counter++;
+                    errors++;
+                    $slider.trigger('jSlider.loadImage', [counter]);
+
+                    if ( counter === numImg ) {
+                        console.log('done! with error', $slider);
+                        callback(errors, counter);
+                    }
+
+                    var index = $(this).parents('.js-slider_review_item').index();
+                    remove(index);
+                });
+                $(this).attr('src', $(this).attr('src'));
+            });
+        }
 
         /**
          * Проверяет переданный индекс
@@ -128,21 +163,39 @@ $.fn.jSlider = function( options ) {
             settings.activEl = index;
             return this;
         }
-
+        
+        function remove ( index ) {
+            if ( isInit ) {
+                $slider.trigger('jSlider.remove', [index]);
+                console.log(index);
+                console.log( $('.js-slider_preview_item').eq(index) );
+                return this;
+            }
+            $slider.find('.js-slider_review_item:eq('+index+')').remove();
+            $slider.find('.js-slider_preview_item:eq('+index+')').remove();
+            return this;
+        }
         
         function stopAutoRatating () {
             $slider.trigger('jSlider.stopAutoRatating');
             return this;
         }
 
-        function startAutoRatating (dalay) {
+        function startAutoRatating ( dalay ) {
             $slider.trigger('jSlider.startAutoRatating', [dalay]);
             return this;
         }
         
 
         // Запускаем слайдер
-        init();
+        waitingAllImg(function(errors, counter){
+            
+            if ( !isInit ) {
+                isInit = true;
+                console.log(errors, counter);
+                init();
+            }
+        });
 
         // Собирает API для работа со слайдером
         var API = {

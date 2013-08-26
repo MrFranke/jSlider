@@ -5,7 +5,6 @@ define([
 ) {
 
     function Preview (slider) {
-
         var $slider = slider.$slider
           , settings = slider.settings
           ;
@@ -14,6 +13,8 @@ define([
           , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
           , isVisable = $slider.is(':visible')
           ;
+
+        $slider.on('jSlider.start', init);
 
         // Элементы управления превью слайдера
         var $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview')
@@ -43,9 +44,9 @@ define([
                 checkActiveOverBounds( index );  // Если активный элемент за видимой обастью, скроллим до него
                 changeCurrentEl( index );        // Меняет активный элимент в превью (необходимо для смены рамки вокруг активного элемента)
             });
-
-            $slider.on('jSlider.start', function (e, index) {
-                
+            
+            $slider.on('jSlider.remove', function(e, i){
+                remove(i);
             });
             
             // Вешаем события на стрелки, только если необходимо листать превью
@@ -67,8 +68,7 @@ define([
             }
 
             $(window).on('resize', resize);
-
-            bindMobileEvent();
+            
 
             $previewItems.on('click.slider.rotator, tap.slider.rotator', click);
         }
@@ -78,112 +78,6 @@ define([
          */
         function resize (e) {
             alignmentItems();
-        }
-
-        /**
-         * Вешает события для тачскринов
-         */
-        function bindMobileEvent () {
-            var direction = slider.verticalDirection? 'top' : 'left'
-              , size = slider.verticalDirection? 'height' : 'width'
-              , offset = 0
-              
-              , startTime   // Время начала жеста
-              , startPoint  // Точка положения списка превью на начало жеста
-              ;
-
-
-            $preview.on('touchstart.slider.review, mousedown.slider.review', touchStart);
-            $preview.on('touchmove.slider.review', touchMove);
-            $preview.on('touchend.slider.review, mouseup.slider.review', touchEnd);
-
-            function touchStart (e) {
-                var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent;
-
-                startTime = new Date().getTime();
-                startPoint = parseInt($preview.css( direction ), 10);
-
-                offset = slider.verticalDirection? eventObj.clientY : eventObj.clientX;
-
-                $(document).on('mousemove.slider.review', touchMove);
-                $(document).on('mouseup.slider.review', touchEnd);
-
-                return false;
-            }
-
-            function touchMove ( e ) {
-                var eventObj = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-                  , currentOffset = slider.verticalDirection? eventObj.clientY : eventObj.clientX
-                  , distance = parseInt($preview.css( direction ), 10) || 0
-                  , newOffset = 0;
-
-                newOffset = offset - currentOffset;
-                offset = currentOffset;
-
-                $preview.css(direction, distance - newOffset);
-                notClick = true;
-                return false;
-            }
-
-            function touchEnd (e) {
-                var offsetList = parseInt($preview.css( direction ), 10)
-                  , $checkEl = numItems > 1? $previewItems.eq(1) : $previewItems.eq(0)
-                  , itemSize = direction === 'left'? $checkEl.outerWidth(true) : $checkEl.outerHeight(true)
-                  , activIndex = Math.round(-offsetList/itemSize)
-
-                  // Переменные для инерции
-                  , MASS = 100
-                  , stopTime = new Date().getTime() // Время остановки жеста
-                  , stopPoint = parseInt($preview.css( direction ), 10) // Точка остановки жеста
-                  , duration = stopTime - startTime
-                  , distance = stopPoint - startPoint
-                  , speed = distance/duration
-                  , impulse = MASS*speed
-                  , anim = {}
-                  ;
-
-
-                // Если имульс слишком мал, то не создаем инерцию
-                if ( Math.abs(impulse) < 100 ) {impulse = 0;}
-
-                $(document).off('mousemove.slider.review', touchMove);
-                $(document).off('mouseup.slider.review', touchEnd);
-                
-                // Если переместили превью за границу, возвращаем их обратно без инерции
-                if ( activIndex <= 0 || activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
-                    
-                    if ( activIndex <= 0 ) {
-                        checkActiveOverBounds(0);
-                        return;
-                    }
-
-                    if ( activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
-                        checkActiveOverBounds(numItems-1);
-                        return;
-                    }
-
-                // Продолжает движение по инерции
-                }else{
-                    anim[direction] = '+='+impulse+'px';
-                    $preview.animate(anim, MASS, function () {
-                        notClick = false; // Возвращаем возможность выбрать картинку после анимации
-                        offsetList = parseInt($preview.css( direction ), 10);
-                        activIndex = Math.round(-offsetList/itemSize);
-                        
-
-                        if ( activIndex <= 0 ) {
-                            checkActiveOverBounds(0);
-                            return;
-                        }
-
-                        if ( activIndex >= (numItems-1)-Math.round(settings.visableElements/2) ) {
-                            checkActiveOverBounds(numItems-1);
-                            return;
-                        }
-
-                    });
-                }
-            }
         }
 
         /**
@@ -315,7 +209,7 @@ define([
                 $next.addClass('disable');
             }
 
-            $preview.animate({
+            $preview.stop(true, true).animate({
                 left: -positionItem
             }, function () {
                 notClick = false; // Возвращаем возможность кликать
@@ -497,8 +391,17 @@ define([
                 , last: newLast
             }
         }
+        
+        function remove ( index ) {
+            var $delettee = $previewItems.eq(index);
+            console.log('2: ',  a = $delettee);
+            /*if ( $delettee.hasClass('active') ) {
+                changeCurrentEl(index+1);
+            }*/
+            //$delettee.remove();
+        }
 
-        init();
+        
 
         return {
               init: init

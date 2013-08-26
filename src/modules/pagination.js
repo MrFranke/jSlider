@@ -9,6 +9,8 @@ define([
     	var $slider = slider.$slider
           , settings = slider.settings
           ;
+
+      $slider.on('jSlider.start', init);
     	
     	var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
           , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
@@ -175,8 +177,6 @@ define([
 
             $list.animate({left: -pos});
         }
-
-        init();
 
         return{
               init: init

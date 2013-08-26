@@ -3,12 +3,11 @@ require([
     '../../../src/jquery.jslider'
 ], function($, jSlider) {
     $('.slider').jSlider({
-        visableElements:3,
+        visableElements: 3,
         resizable: false,
-        tests: true
+        pagination: true
     });
     $('.slider__vertical').jSlider({
-    	alignment: true,
     	verticalDirection: true
     });
 });
