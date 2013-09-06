@@ -99,7 +99,7 @@ define([
          */
         function move ( index ) {
             var $el = $reviewItems.eq( index )
-              , pos = $el.position().left
+              , pos = settings.verticalDirection? $el.position().top : $el.position().left
               , diff = Math.abs( index - settings.activEl );
 
             $prev.removeClass('disable');
@@ -125,17 +125,13 @@ define([
                 return false;
             }
 
-            if ( settings.verticalDirection ) {
-                $review.animate({ top: -$el.position().top });
-            }
             
             // Если нужно переместить изображение больше чем на 5 слайдев,
             // то не крутим картинки, а скрываем и показываем нужную
             if ( diff > settings.maxDiffForImageRotating && settings.animation ) {
                 $reviewItems.animate({opacity: 0});
-                $review.css({left: -pos});
+                $review.css(direction, -pos);
                 $reviewItems.animate({opacity: 1});
-                
             }else{
                 rotateAnimation(pos);
             }

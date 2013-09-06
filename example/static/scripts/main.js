@@ -8,6 +8,7 @@ require([
         pagination: true
     });
     $('.slider__vertical').jSlider({
-    	verticalDirection: true
+        verticalDirection: true,
+        alignment: true
     });
 });

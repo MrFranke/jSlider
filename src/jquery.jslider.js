@@ -25,7 +25,7 @@ $.fn.jSlider = function( options ) {
               , slideOnLastFirstEl: !options.verticalDirection // Крутит слайдер при нажатии на крайние элементы
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
               , motionlessPreview: false // Если true, то превью не перемещается
-              , resizable: false
+              , resizable: true
 
 
               , preloadCallback: null // Функция, которая вызывается сразу после инициализации слайдера
@@ -48,6 +48,7 @@ $.fn.jSlider = function( options ) {
         var numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
           , isVisable = $slider.is(':visible')
           , isInit = false
+          , errorImages = []
           ;
 
         // TODO: Придумать более надежную систему подгрузки модулей. 
@@ -59,9 +60,20 @@ $.fn.jSlider = function( options ) {
 
         // Инициализируем все модули для слайдера
         function init () {
+            // Удаляем все картинки с ошибками
+            var index, $prev, $rev;
+            for (var i = 0; i < errorImages.length; i++) {
+                index = errorImages[i].parents('.js-slider_review_item').length  ? 
+                        errorImages[i].parents('.js-slider_review_item').index() : 
+                        errorImages[i].parents('.js-slider_preview_item').index();
+                $rev = $slider.find('.js-slider_preview_item:eq('+index+')');
+                $prev = $slider.find('.js-slider_review_item:eq('+index+')');
+                
+                remove( $rev, $prev );
+            }
             // Подгружает и инициализирует модули слайдера
             require(modules, function () {
-                modules = [];
+                modules = []; // Перезаписываем массив с модулями, заменяя ссылки на класс модуля
                 for (var i = 0; i < arguments.length; i++) {
                     if ( arguments[i] ) {
                         modules.push( new arguments[i]( that ) );
@@ -84,6 +96,9 @@ $.fn.jSlider = function( options ) {
             });
 
         }
+        $slider.on('jSlider.loadImage', function (e, error, counter, errorImages) {
+            //console.log(error, ' ', counter);
+        });
 
         /**
          * Функция автоматического пролистывания слайдера
@@ -104,50 +119,45 @@ $.fn.jSlider = function( options ) {
             interval = itl;
         }
         
-        /*
-         * Функция ждет загрузки всех картинок в слайдере и после того как они все прогрузятся, она его запускает
+        /**
+         * Функция для обработки загрузки картинок. Удаляет не прогрузившиеся картинки
          */
         function waitingAllImg ( callback ) {
             var counter = 0
-              , errors = 0
+              , error = 0
               , numImg = $slider.find('img').length
               ;
-            
+
             $slider.find('img').each(function(){
-                if ( this.complete ) {
-                    counter++;
-                    if ( counter === numImg ) {
-                        console.log('done! with complete', $slider);
-                        callback(errors, counter);
-                    }
-                    
-                }
-                
-                $(this).load(function(){
-                    counter++;
-                    $slider.trigger('jSlider.loadImage', [counter]);
+                var src = $(this).attr('src')
+                  , $this = $(this);
 
-                    if ( counter === numImg ){
-                        console.log('done! with load', $slider);
-                        callback(errors, counter);
-                    }
+                $this.load(function () {
+                   counter++;
+                   $slider.trigger('jSlider.loadImage', [error, counter, errorImages]);
+                   if ( counter === numImg ) {callback();}
+                });
+
+                $this.error(function () {
+                    // Записываем ошибку, для того что бы потом удалить эту картинку
+                    error++;
+                    errorImages.push( $(this) );
+
+                    counter++;
+                    $slider.trigger('jSlider.loadImage', [error, counter, errorImages]);
+                    if ( counter === numImg ) {callback();}
                 });
                 
-                $(this).error(function(){
-                    counter++;
-                    errors++;
-                    $slider.trigger('jSlider.loadImage', [counter]);
-
-                    if ( counter === numImg ) {
-                        console.log('done! with error', $slider);
-                        callback(errors, counter);
-                    }
-
-                    var index = $(this).parents('.js-slider_review_item').index();
-                    remove(index);
-                });
-                $(this).attr('src', $(this).attr('src'));
+                // Хак для того что бы сработали все события ошибок и загрузки
+                $this.attr('src', '#');
+                $this.attr('src', src);
             });
+            
+        }
+
+        function remove ( $rev, $prev ) {
+            $rev.remove();
+            $prev.remove();
         }
 
         /**
@@ -157,22 +167,14 @@ $.fn.jSlider = function( options ) {
             return i >= 0 && i < numItems;
         }
         
+        /**
+         * Менет активный элемент
+         * @param {Number} Индекс элемента, который нужно сделать активным
+         */
         function changeActiveElement ( index ) {
             if ( !checkIndexOverBounds(index) ) { return false; }     // Если индекс больше колличества картинок, или меньше - ничего не делаем
             $slider.trigger('jSlider.activeElementChanged', [index]);
             settings.activEl = index;
-            return this;
-        }
-        
-        function remove ( index ) {
-            if ( isInit ) {
-                $slider.trigger('jSlider.remove', [index]);
-                console.log(index);
-                console.log( $('.js-slider_preview_item').eq(index) );
-                return this;
-            }
-            $slider.find('.js-slider_review_item:eq('+index+')').remove();
-            $slider.find('.js-slider_preview_item:eq('+index+')').remove();
             return this;
         }
         
@@ -188,21 +190,14 @@ $.fn.jSlider = function( options ) {
         
 
         // Запускаем слайдер
-        waitingAllImg(function(errors, counter){
-            
-            if ( !isInit ) {
-                isInit = true;
-                console.log(errors, counter);
-                init();
-            }
-        });
+        waitingAllImg(init);
 
         // Собирает API для работа со слайдером
         var API = {
               stopAutoRatating  : stopAutoRatating
             , startAutoRatating : startAutoRatating
             , changeActiveElement: changeActiveElement
-            , $el: $slider
+            , $slider: $slider
         };
 
         return API;
@@ -226,7 +221,7 @@ $.fn.jSlider = function( options ) {
      * Функция для поиска API для нужного слайдера.
      * @param $slider {Object} Объект jQuery или DOMNode элемент
      */
-    function getCurrentAPI ($slider) {
+    function getCurrentAPI ( $slider ) {
         var slider = $slider.get? $slider.get(0) : $slider;
         for (var i = 0; i < this.length; i++) {
             if ( this[i].$el.get(0) === slider ) {
@@ -236,9 +231,8 @@ $.fn.jSlider = function( options ) {
         return null;
     }
 
-    // Объект для ъранения всех API слайдеров
-    APIStack = function () {};
+    // Объект для хранения всех API слайдеров
+    APIStack = function () {this.getCurrentAPI = getCurrentAPI;};
     APIStack.prototype = Array.prototype;
-    APIStack.prototype.getCurrentAPI = getCurrentAPI;
 
 }

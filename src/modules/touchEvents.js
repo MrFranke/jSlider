@@ -8,7 +8,7 @@ define([
         var $slider = slider.$slider
           , settings = slider.settings;
 
-          
+
         $slider.on('jSlider.start', init);
 
         var $preview
@@ -19,6 +19,8 @@ define([
           , $review
           , $reviewItems
           , $reviewWrapper
+
+          , $antiClockDiv
 
           , direction;
 
@@ -41,6 +43,13 @@ define([
             direction = settings.verticalDirection? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
             size = settings.verticalDirection? 'height' : 'width';    // Вертикальный или горизонтальный слайдер
             offset = 0;                                               // Начальное положение списка
+            $('body').append('<div id="noclick" style="'
+                            +'width: 100px;'
+                            +'height: 100px;'
+                            +'position: absolute;'
+                            +'display: none;">'
+                           +'</div>');
+            $antiClockDiv = $('#noclick');
         }
             
 
@@ -88,8 +97,10 @@ define([
             $(document).on('touchmove.slider.touchEvent, mousemove.slider.touchEvent', e.data, touchMove);
             $(document).on('touchend.slider.touchEvent, mouseup.slider.touchEvent', e.data, touchEnd);
             
-            slider.stopAutoRatating();
+            // Добовляем слой, что бы при перетаскивании нелзя было нажать на превью
+            $antiClockDiv.css({left:0,top:0}).show();
 
+            slider.stopAutoRatating();
             e.preventDefault();
         }
 
@@ -99,7 +110,12 @@ define([
               , newPosition = coords - e.data.offset
               , padding = settings.verticalDirection? e.data.$lastItem.outerHeight() / 2 : e.data.$lastItem.outerWidth() / 2
               ;
-            
+
+            // Перемещаем подложку за мышкой
+            $antiClockDiv.css({
+                left: originalEvent.clientX - 50,
+                top: originalEvent.clientY - 50
+            });
             
             if ( newPosition > padding ) { return false; }
             if ( newPosition < -e.data.lastBounds - padding ) { return false; }
@@ -122,7 +138,9 @@ define([
             
             $(document).off('touchmove.slider.touchEvent, mousemove.slider.touchEvent', touchMove);
             $(document).off('touchend.slider.touchEvent, mouseup.slider.touchEvent', touchEnd);
-            
+            $antiClockDiv.hide();
+
+            // Если слайды вылезли за границы, то возвращаем их к активному элементу
             if ( e.data.directFrames && !checkBounds(position, e.data.$lastItem, e.data.$wrapper) ) {
                 newPos = e.data.$items.filter('.active').position()[ direction ];
                 animateObj[ direction ] = -newPos;
@@ -151,18 +169,20 @@ define([
             }
 
             e.preventDefault();
+            e.stopPropagation();
         }
 
         /**
          * Проверяет переданные координаты на соответствие границам.
-         * Границы высчитывает для 
          */
         function checkBounds ( coords, $item, $wrapper ) {
             var size = settings.verticalDirection? $item.last().outerHeight() : $item.last().outerWidth()
+              , margin = settings.verticalDirection? $item.last().css('marginTop') : $item.last().css('marginLeft')
               , position = $item.position()[ direction ];
             coords *= -1;
+            margin = parseInt(margin, 10);
             // находим границу слайдераs
-            var bound = ( position + size ) - $wrapper.width();
+            var bound = ( position + size + margin ) - $wrapper.width();
             if ( coords < 0 ) { return false; }
             if ( coords > bound ) { return false; }
             return true;

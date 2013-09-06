@@ -26,16 +26,16 @@ define([
               first: $previewItems.eq(0)
             , last: $previewItems.eq( settings.visableElements-1 )
           }
-          , notClick = false
           ;
          
         function init () {
+            bindEvents();
+
             // Выравнивание элементов превью по ширине видимой области
             if ( settings.alignment ){ alignmentItems(); }
 
             $previewItems.eq( indexActiveItem ).addClass('active');
 
-            bindEvents();
         }
 
         function bindEvents () {
@@ -43,10 +43,6 @@ define([
                 slideOnSideElements( index );    // Если это крайний элемент, то двигаем слайдер
                 checkActiveOverBounds( index );  // Если активный элемент за видимой обастью, скроллим до него
                 changeCurrentEl( index );        // Меняет активный элимент в превью (необходимо для смены рамки вокруг активного элемента)
-            });
-            
-            $slider.on('jSlider.remove', function(e, i){
-                remove(i);
             });
             
             // Вешаем события на стрелки, только если необходимо листать превью
@@ -97,8 +93,7 @@ define([
          * @method click
          * @private
          */
-        function click () {
-            if ( notClick ) {return false;}
+        function click (e) {
             var i = $(this).index();
             slider.changeActiveElement( i ); // Меняет картинку
             changeCurrentEl( i );
@@ -211,8 +206,6 @@ define([
 
             $preview.stop(true, true).animate({
                 left: -positionItem
-            }, function () {
-                notClick = false; // Возвращаем возможность кликать
             });
         }
 
@@ -250,8 +243,6 @@ define([
 
             $preview.animate({
                 top: -positionItem
-            }, function () {
-                notClick = false; // Возвращаем возможность кликать
             });
         }
 
@@ -389,19 +380,9 @@ define([
             return{
                   first: newFirst
                 , last: newLast
-            }
+            };
         }
-        
-        function remove ( index ) {
-            var $delettee = $previewItems.eq(index);
-            console.log('2: ',  a = $delettee);
-            /*if ( $delettee.hasClass('active') ) {
-                changeCurrentEl(index+1);
-            }*/
-            //$delettee.remove();
-        }
-
-        
+      
 
         return {
               init: init
@@ -409,7 +390,7 @@ define([
             , alignmentItems: alignmentItems
             , checkActiveOverBounds: checkActiveOverBounds
             , changeCurrentEl: changeCurrentEl
-        }
+        };
 
     }
     
