@@ -20,7 +20,7 @@ $.fn.jSlider = function( options ) {
               , pagination: false
               , tests: false
               , touch: true
-              , visableElements: 4  // Колличество видимых \на странице элементов
+              , visableElements: 3  // Колличество видимых \на странице элементов
               , step: options.verticalDirection ? 1 : 4     // Если вертикальный слайдер, то перематываем на 1 шаг вперед (если не указанно другое)
               , slideOnLastFirstEl: !options.verticalDirection // Крутит слайдер при нажатии на крайние элементы
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация

@@ -32,7 +32,7 @@ define([
             bindEvents();
 
             // Выравнивание элементов превью по ширине видимой области
-            if ( settings.alignment ){ alignmentItems(); }
+            if ( settings.alignment && !settings.verticalDirection ){ alignmentItems(); }
 
             $previewItems.eq( indexActiveItem ).addClass('active');
 
@@ -63,7 +63,9 @@ define([
                 disableRotator();
             }
 
-            $(window).on('resize', resize);
+            if ( !settings.verticalDirection ) {
+                $(window).on('resize', resize);
+            }
             
 
             $previewItems.on('click.slider.rotator, tap.slider.rotator', click);
@@ -230,6 +232,7 @@ define([
               , marginItem = $newFirstItem.css('marginTop') === 'auto'? 0 : $newFirstItem.css('marginTop')
               , marginItem = parseInt(marginItem, 10)
               , positionItem = $newFirstItem.position().top + marginItem;
+
             
             $prev.removeClass('disable');
             $next.removeClass('disable');
@@ -241,24 +244,9 @@ define([
                 $next.addClass('disable');
             }
 
-            $preview.animate({
+            $preview.stop(true, true).animate({
                 top: -positionItem
             });
-        }
-
-        
-        /**
-         * Вызывает нужный метод для выравнивания превью
-         * @method: alignmentItems
-         * @private
-         */
-        function alignmentItems () {
-            if ( settings.verticalDirection ) {
-                verticalAlignmentItems();
-            }else{
-                horizontalAlignmentItems();
-            }
-            
         }
 
         /**
@@ -267,7 +255,7 @@ define([
          * @returns itemMargin {Number} Новый "margin-left" у элементов
          * @private
          */
-        function horizontalAlignmentItems () {
+        function alignmentItems () {
             var visableElements = settings.visableElements-1
               , itemWidth = $previewItems.first().width()
               , previewsWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').width()
@@ -309,35 +297,6 @@ define([
             }
 
             return marginLeft;
-        }
-
-        /**
-         * Выравнивает превьюшки так, что бы в видимую область влезало необходимое колличество элементов
-         * @method: verticalAlignmentItems
-         * @returns itemMargin {Number} Новый "margin-top" у элементов
-         * @private
-         */
-        function verticalAlignmentItems () {
-            var visableElements = settings.visableElements-1
-              , itemHeight = $previewItems.first().height()
-              , previewsHeight = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').height()
-              , $img = $previewItems.first().find('img')
-              , marginTop
-              ;
-
-                           
-            $img.load(function () {
-                itemWidth = $previewItems.first().height();
-                marginTop = ( previewsHeight - ( itemHeight * (visableElements+1) ) ) / visableElements
-                marginTop = marginTop.toFixed(0);
-
-                $previewItems.css({
-                    marginTop: marginTop + 'px'
-                });
-            });
-
-
-            return marginTop;
         }
 
         /**

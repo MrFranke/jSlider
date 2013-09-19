@@ -5,7 +5,7 @@ require([
     $('.slider').jSlider({
         visableElements: 3,
         resizable: false,
-        pagination: true
+        modules: {pagination: true}
     });
     $('.slider__vertical').jSlider({
         verticalDirection: true,
