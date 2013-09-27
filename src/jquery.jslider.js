@@ -20,7 +20,7 @@ $.fn.jSlider = function( options ) {
               , pagination: false
               , tests: false
               , touch: true
-              , visableElements: 3  // Колличество видимых \на странице элементов
+              , visableElements: 4  // Колличество видимых \на странице элементов
               , step: options.verticalDirection ? 1 : 4     // Если вертикальный слайдер, то перематываем на 1 шаг вперед (если не указанно другое)
               , slideOnLastFirstEl: !options.verticalDirection // Крутит слайдер при нажатии на крайние элементы
               , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
@@ -62,15 +62,19 @@ $.fn.jSlider = function( options ) {
         function init () {
             // Удаляем все картинки с ошибками
             var index, $prev, $rev;
+            
             for (var i = 0; i < errorImages.length; i++) {
-                index = errorImages[i].parents('.js-slider_review_item').length  ? 
-                        errorImages[i].parents('.js-slider_review_item').index() : 
-                        errorImages[i].parents('.js-slider_preview_item').index();
-                $rev = $slider.find('.js-slider_preview_item:eq('+index+')');
-                $prev = $slider.find('.js-slider_review_item:eq('+index+')');
+                index = errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length  ? 
+                        errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').index() : 
+                        errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__preview__item').index();
+                $rev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item:eq('+index+')');
+                $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item:eq('+index+')');
                 
                 remove( $rev, $prev );
             }
+            
+            numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length;
+            
             // Подгружает и инициализирует модули слайдера
             require(modules, function () {
                 modules = []; // Перезаписываем массив с модулями, заменяя ссылки на класс модуля
@@ -145,7 +149,9 @@ $.fn.jSlider = function( options ) {
 
                     counter++;
                     $slider.trigger('jSlider.loadImage', [error, counter, errorImages]);
-                    if ( counter === numImg ) {callback();}
+                    if ( counter === numImg ) {
+                        callback();
+                    }
                 });
                 
                 // Хак для того что бы сработали все события ошибок и загрузки

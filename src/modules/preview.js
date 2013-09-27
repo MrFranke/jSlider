@@ -10,18 +10,18 @@ define([
           ;
 
         var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
-          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
+          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length
           , isVisable = $slider.is(':visible')
           ;
 
         $slider.on('jSlider.start', init);
 
         // Элементы управления превью слайдера
-        var $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview')
-          , $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow')
-          , $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item')
-          , $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_nav_prev')
-          , $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_nav_next')
+        var $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview')
+          , $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow')
+          , $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item')
+          , $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__prev')
+          , $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__next')
           , lastOrFirstRotatorItems = {
               first: $previewItems.eq(0)
             , last: $previewItems.eq( settings.visableElements-1 )
@@ -35,7 +35,11 @@ define([
             if ( settings.alignment && !settings.verticalDirection ){ alignmentItems(); }
 
             $previewItems.eq( indexActiveItem ).addClass('active');
-
+            
+            // Если нет выравнивания, то мы сами определяем количество видимых элементов
+            if ( !settings.alignment && $slider.is(':visible') ) {
+                settings.visableElements = Math.floor($previewOverflow.width() / $previewItems.first().outerWidth());
+            }
         }
 
         function bindEvents () {
@@ -63,20 +67,11 @@ define([
                 disableRotator();
             }
 
-            if ( !settings.verticalDirection ) {
-                $(window).on('resize', resize);
-            }
             
 
             $previewItems.on('click.slider.rotator, tap.slider.rotator', click);
         }
 
-        /**
-         * Выравниваем элементы при ресайзе окна
-         */
-        function resize (e) {
-            alignmentItems();
-        }
 
         /**
          * Если элеменов меньше чем должно быть в видимой области, возвращаем false
@@ -258,27 +253,17 @@ define([
         function alignmentItems () {
             var visableElements = settings.visableElements-1
               , itemWidth = $previewItems.first().width()
-              , previewsWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow').width()
+              , previewsWidth = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow').width()
               , marginLeft
               , marginLeft
               , $img = $previewItems.first().find('img')
               ;
-
-            
-            
-            if (settings.resizable) {
-                visableElements = settings.visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
-            }
 
 
             // При загрузке слайдера ждем подгрузки картинок
             if ( !itemWidth ) {
                 $img.load(function () {
                     itemWidth = $previewItems.first().width();
-                    
-                    if (settings.resizable) {
-                        visableElements = parseInt((previewsWidth/itemWidth).toFixed(0), 10)-2 || 1;
-                    }
                     
                     marginLeft = ( previewsWidth - ( itemWidth * (visableElements+1) ) ) / visableElements;
                     marginLeft = marginLeft.toFixed(0);
@@ -327,6 +312,7 @@ define([
                 newLastIndex = numItems-1;
                 newFirstIndex = (numItems-1) - (visableElNum-1);
                 newFirstIndex = newFirstIndex < 0 ? 0 : newFirstIndex; // Если элементов в слайдере меньше видимых элиментов
+
             }
 
             newLast = $items.eq( newLastIndex );

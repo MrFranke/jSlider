@@ -1,0 +1,450 @@
+.inline-block() {
+    display: -moz-inline-stack;
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+
+.disable-select() {
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.opacity( @opacity: 0.3 ){
+    @opacityIE: @opacity * 100;
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=@opacityIE);
+    -moz-opacity: @opacity;
+    -khtml-opacity: @opacity;
+    opacity: @opacity;
+}
+
+.slider {    
+    // Основные картинки слайдера
+    &__frames {
+       position: relative;
+        
+        &__overflow {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+        
+        &__nav {
+            // Миксин для обоих стрелок
+            .nav(){
+                .disable-select();
+                display: block;
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: #333;
+                cursor: pointer;
+                z-index: 1;
+            }
+            
+            &--prev {
+                .nav();
+                left: 10px;
+            }
+            &--next {
+                .nav();
+                right: 10px;
+            }
+        }
+        
+         &__list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            width: 99999px;
+            position: relative;
+            font-size: 0;
+        }
+        
+        // Сама картинка слайдера
+        &__item {
+            .inline-block();
+            text-align: center;
+            font-size: 20px;
+            position: relative;
+        }
+        
+    } // &__frames end
+    
+    // Список превью
+    &__preview {
+        .disable-select();
+        width: 9999px;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        font-size: 0;
+        letter-spacing: -1px;
+        
+        &__wrapper {
+            padding: 10px 75px;
+            position: relative;
+            margin-top: -115px;
+            height: 90px;
+            
+            &__bg {
+                background: #222;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                .opacity(0.5);
+            }
+        }
+        
+        &__overfow {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        &__nav {
+            .nav(){
+                .disable-select();
+                display: block;
+                position: absolute;
+                width: 20px;
+                height: 35px;
+                cursor: pointer;
+                z-index: 1;
+                top: 50%;
+                margin-top: -17px;
+            }
+            
+            &__next {
+                .nav();
+                right: 10px;
+                background-position: 100% 0;
+                &.disable {
+                    background-position: 100% 100%;
+                }
+            }
+            
+            &__prev {
+                .nav();
+                left: 10px;
+                &.disable {
+                    background-position: 0 100%;
+                }
+            }
+        }
+        
+        // Превью в списке    
+        &__item {
+            .inline-block();
+            font-size: 20px;
+            margin-left: 30px;
+            position: relative;
+            
+            &__border {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 96%;
+                height: 93%;
+                border: 3px solid #fff;
+                display: none;
+            }
+            
+            &.active .slider__preview__item__border {
+                display: block;
+            }
+            
+            &:first-child {
+                margin-left: 0!important;
+            }
+            
+            img {
+                display: block;
+            }
+    
+        }
+    } // &__preview end
+
+    
+    // Пагинация
+    &_pagination {
+        position: relative;
+        padding: 0 30px;
+        
+        &_overflow {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        &_list {
+            width: 9999px;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+        
+        &_item {
+            .inline-block();
+            width: 20px;
+            margin-left: 10px;
+            font-size: 15px;
+            margin-right: 10px;
+            color: #fff;
+            cursor: pointer;
+            
+            &:first-child {
+                margin-left: 0;
+            }
+            
+            &.active {
+                color: red;
+            }
+        }
+        
+        &_nav {
+            .disable-select();
+            display: block;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #333;
+            cursor: pointer;
+            
+            &_prev {
+                left: 10px;
+            }
+            
+            &_next {
+                right: 10px;
+            }
+
+        }
+    }
+    
+    
+    &__vertical {
+        background: #000;
+        height: 360px;
+        overflow: hidden;
+        
+        &-big_images {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            width: 99999px;
+            position: relative;
+            font-size: 0;
+            
+            &-wrapper {
+                position: relative;
+            }
+            
+            &-overflow {
+                overflow: hidden;
+                position: relative;
+                width: 100%;
+            }
+            
+            &-nav {
+                .disable-select();
+                display: block;
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: #333;
+                cursor: pointer;
+                z-index: 1;
+                
+                &-prev {
+                    left: 10px;
+                }
+                
+                &-next {
+                    right: 10px;
+                }
+            }
+        }
+        
+        &-image {
+            .inline-block();
+            text-align: center;
+            font-size: 20px;
+            position: relative;
+        }
+        
+        &-list {
+            width: 9999px;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            font-size: 0;
+            letter-spacing: -1px;
+            .disable-select();
+            
+            &-wrapper {
+                padding: 10px 75px;
+                position: relative;
+                margin-top: -115px;
+                height: 90px;
+                
+                &-bg {
+                    background: #222;
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    filter: alpha(opacity=50);
+                    -moz-opacity: .5;
+                    -khtml-opacity: .5;
+                    opacity: .5;
+                }
+
+            }
+            
+            &t-overfow {
+                overflow: hidden;
+                width: 480px;
+                height: 100%;
+                position: relative;
+            }
+
+        }
+        
+        &-item {
+            .inline-block();
+            font-size: 20px;
+            margin-left: 30px;
+            position: relative;
+            
+            &-border {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 96%;
+                height: 93%;
+                border: 3px solid #fff;
+                display: none;
+            }
+            
+            &.active .slider-item-border {
+                display: block;
+            }
+            
+            &:first-child {
+                margin-left: 0!important;
+            }
+            
+            img {
+                display: block;
+            }
+        }
+        
+        &-nav {
+            .disable-select();
+            display: block;
+            position: absolute;
+            width: 20px;
+            height: 35px;
+            cursor: pointer;
+            z-index: 1;
+            top: 50%;
+            margin-top: -17px;
+            
+            &-next {
+                right: 10px;
+                background-position: 100% 0;
+                
+                &.disable {
+                    background-position: 100% 100%;
+                }
+            }
+            
+            &-prev {
+                left: 10px;
+                
+                &.disable {
+                    background-position: 0 100%;
+                }
+            }
+        }
+    }
+
+}
+
+
+.slider__vertical .slider-big_images-overflow {
+    height: 362px;
+}
+
+.slider__vertical .slider-big_images {
+    width: 100%;
+    height: 9999px;
+}
+
+.slider__vertical .slider-big_images-wrapper {
+    .inline-block();
+    padding: 0;
+    width: 70%;
+}
+
+.slider__vertical .slider-image {
+    text-align: left;
+    display: block;
+}
+
+.slider__vertical .slider-list-wrapper {
+    .inline-block();
+    padding: 40px 11px;
+    width: 21%;
+    vertical-align: top;
+    margin-top: 0;
+    height: 285px;
+}
+
+.slider__vertical .slider-list {
+    height: 9999px;
+    width: 100%;
+}
+
+.slider__vertical .slider-list-overfow {
+    height: 285px;
+    width: 100%;
+}
+
+.slider__vertical .slider-list .slider-item {
+    display: block;
+    margin-left: 0;
+}
+
+.slider__vertical .slider-list .slider-item:first-child {
+    margin-top: 0!important;
+}
+
+.slider__vertical .slider-item-border {
+    width: 92%;
+}
+
+.slider__vertical .slider-nav {
+    width: 35px;
+    height: 20px;
+    left: 50%;
+    margin-left: -17px;
+    right: auto;
+}
+
+.slider__vertical .slider-nav-prev {
+    top: 25px;
+}
+
+.slider__vertical .slider-nav-next {
+    top: auto;
+    bottom: 8px;
+    background-position: 100% 0;
+}

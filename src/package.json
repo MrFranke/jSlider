@@ -1,8 +1,8 @@
 {
     "name": "jslider",
-    "version": "2.0.0",
-    "description": "!Universal slider on jQuery",
-    "keywords": [ "slider", "jquery plugin", "carousel", "images" ],
+    "version": "2.0.1",
+    "description": "Universal slider on jQuery",
+    "keywords": [ "slider", "jquery plugin", "carousel" ],
     "main": "jquery.jslider.js",
     "author": {
         "name": "Moskalev Mikhail"
@@ -12,9 +12,6 @@
     "bugs": {
     },
     "dependencies": {
-        "jquery"   : ">1.4.2",
-        "colorbox" : ">=1.3.20",
-	"mocha-amd": ">=1.12.0",
-	"chai-amd" : ">=1.7.2"
+        "jquery"   : ">1.4.2"
     }
 }

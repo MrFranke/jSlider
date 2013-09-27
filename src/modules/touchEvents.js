@@ -31,13 +31,13 @@ define([
         }
 
         function updateVars () {
-            $review  = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review');
-            $reviewItems  = $review.find('.'+settings.SLIDER_CSS_CLASS+'_review_item');
-            $reviewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_overflow');
-
-            $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview');
-            $previewItems = $preview.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item');
-            $previewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_overflow');
+            $review  = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__list');
+            $reviewItems  = $review.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item');
+            $reviewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow');
+            
+            $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview');
+            $previewItems = $preview.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item');
+            $previewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow');
             $previewLastEl = $previewItems.eq( $previewItems.last().index()+1 - (settings.visableElements) );
 
             direction = settings.verticalDirection? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
@@ -69,7 +69,7 @@ define([
             
             var margin = settings.verticalDirection? parseInt($previewLastEl.css('marginTop'), 10) : parseInt($previewLastEl.css('marginLeft'), 10);
             
-            $preview.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent', 
+            $preview.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
                         {
                             $wrapper: $previewWrapper, 
                             $list: $preview, 
@@ -83,7 +83,7 @@ define([
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
               , startCoords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
               , listPosition = e.data.$list.position()[ direction ]
-              , cursorOffset = startCoords - listPosition // Узнаем позицию относительно элемента, который нужно перемещать
+              , cursorOffset = startCoords - listPosition; // Узнаем позицию относительно элемента, который нужно перемещать
               
 
             
@@ -117,6 +117,8 @@ define([
                 top: originalEvent.clientY - 50
             });
             
+            e.data.lastBounds = e.data.$list.width(); // Кривой хак для правильного определения границы списка картинок в скрытом слайдере
+
             if ( newPosition > padding ) { return false; }
             if ( newPosition < -e.data.lastBounds - padding ) { return false; }
             
@@ -158,6 +160,7 @@ define([
             // Если превью вылезли за правую/нижнюю границу
             if ( position < 0 && !checkBounds(position, e.data.$lastItem, e.data.$wrapper) ) {
                 animateObj[ direction ] = -positionForRightBound;
+
                 e.data.$list.animate(animateObj);
                 return;
             }

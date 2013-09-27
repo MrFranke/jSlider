@@ -7,8 +7,9 @@ require([
         resizable: false,
         modules: {pagination: true}
     });
-    $('.slider__vertical').jSlider({
+    /*$('.slider__vertical').jSlider({
         verticalDirection: true,
-        alignment: true
-    });
+        alignment: true,
+        visableElements: 3
+    });*/
 });

@@ -6,14 +6,14 @@ define([
 
     function Pagination (slider) {
 
-    	var $slider = slider.$slider
+        var $slider = slider.$slider
           , settings = slider.settings
           ;
 
       $slider.on('jSlider.start', init);
-    	
-    	var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
-          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
+        
+        var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
+          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__review__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length
           , isVisable = $slider.is(':visible')
           ;
 
@@ -31,7 +31,7 @@ define([
          * @private
          */
         function init () {
-            var $htmlPagination = $slider.find( '.'+settings.SLIDER_CSS_CLASS+'_pagination_list' );
+            var $htmlPagination = $slider.find( '.'+settings.SLIDER_CSS_CLASS+'__pagination__list' );
 
             if ( $htmlPagination.length ) {
                 $htmlPagination.empty(); // Если пагинация уже была созданна, отчищаем ее
@@ -45,23 +45,29 @@ define([
         }
         
         function bindEvent () {
-            $next.bind('click.slider.pagination', function () {
-                changeActiveElement(indexActiveItem+1);
-                review.stopAutoRatating(); // Останавливаем автоматическое вращение
+            $slider.on('jSlider.activeElementChanged', function (e, index) {
+                move(index);
             });
-            $prev.bind('click.slider.pagination', function () {
-                changeActiveElement(indexActiveItem-1);
-                review.stopAutoRatating(); // Останавливаем автоматическое вращение
+
+            $next.on('click.slider.pagination', function () {
+                slider.changeActiveElement(indexActiveItem+1);
+                slider.stopAutoRatating(); // Останавливаем автоматическое вращение
+                return false;
             });
-            $items.bind('click.slider.pagination', click);
+            $prev.on('click.slider.pagination', function () {
+                slider.changeActiveElement(indexActiveItem-1);
+                slider.stopAutoRatating(); // Останавливаем автоматическое вращение
+                return false;
+            });
+            $items.on('click.slider.pagination', click);
         }
 
         function updateVars () {
-            $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_pagination_nav_prev');
-            $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_pagination_nav_next');
-            $list = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_pagination_list');
-            $items = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_pagination_item');
-            $overflow = $('.'+settings.SLIDER_CSS_CLASS+'_pagination_overflow');
+            $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__prev');
+            $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__next');
+            $list = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__list');
+            $items = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__item');
+            $overflow = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__overflow');
 
             lastOrFirstPaginationItems = searchVisableEl();
         }
@@ -71,11 +77,11 @@ define([
          */
         function createPaginationTmp ( returnList ) {
             var tmp = ''
-              , top = '<div class="'+settings.SLIDER_CSS_CLASS+'_pagination">'
-                        +'<div class="'+settings.SLIDER_CSS_CLASS+'_pagination_nav '+settings.SLIDER_CSS_CLASS+'_pagination_nav_prev"></div>'
-                        +'<div class="'+settings.SLIDER_CSS_CLASS+'_pagination_nav '+settings.SLIDER_CSS_CLASS+'_pagination_nav_next"></div>'
-                        +'<div class="'+settings.SLIDER_CSS_CLASS+'_pagination_overflow">'
-                            +'<ul class="'+settings.SLIDER_CSS_CLASS+'_pagination_list">'
+              , top = '<div class="'+settings.SLIDER_CSS_CLASS+'__pagination">'
+                        +'<div class="'+settings.SLIDER_CSS_CLASS+'__pagination__nav '+settings.SLIDER_CSS_CLASS+'__pagination__nav__prev"></div>'
+                        +'<div class="'+settings.SLIDER_CSS_CLASS+'__pagination__nav '+settings.SLIDER_CSS_CLASS+'__pagination__nav__next"></div>'
+                        +'<div class="'+settings.SLIDER_CSS_CLASS+'__pagination__overflow">'
+                            +'<ul class="'+settings.SLIDER_CSS_CLASS+'__pagination__list">'
               , list = ''
 
               , bottom =    '</ul>'
@@ -84,11 +90,11 @@ define([
 
             for (var i = 0; i < numItems; i++) {
                 if ( indexActiveItem === i ) { // Активный элемент
-                    list += '<li class="'+settings.SLIDER_CSS_CLASS+'_pagination_item active">'+(i+1)+'</li>';
+                    list += '<li class="'+settings.SLIDER_CSS_CLASS+'__pagination__item active"><a href="javascript:void(0)">'+(i+1)+'</a></li>';
                     continue;
                 }
-                list += '<li class="'+settings.SLIDER_CSS_CLASS+'_pagination_item">'+(i+1)+'</li>';
-            };
+                list += '<li class="'+settings.SLIDER_CSS_CLASS+'__pagination__item"><a href="javascript:void(0)">'+(i+1)+'</a></li>';
+            }
 
             if ( returnList ) {
                 return list;
@@ -106,10 +112,10 @@ define([
         function searchVisableEl () {
             var itemsLength = $items.length
               , $item = $items.eq( itemsLength > 1 ? 1 : 0 )
-              , margin = parseInt( $item.css('marginLeft'), 10)
+              , margin = parseInt( $item.css('marginLeft'), 10) + parseInt( $item.css('marginRight'), 10)
               , itemWidth = $item.width() + margin
               , paginatorWidth = $overflow.width()
-              , numVisable = paginatorWidth / itemWidth
+              , numVisable = Math.floor(paginatorWidth / itemWidth)
               , indexLastItem = Math.floor( numVisableEl - 1 )
               , $firstItem = $items.eq(0)
               , $lastItem = $items.eq( indexLastItem );
@@ -119,7 +125,7 @@ define([
             return {
                   first: $firstItem
                 , last: $lastItem
-            }
+            };
         }
 
         /**
@@ -175,7 +181,55 @@ define([
                                                   lastOrFirstPaginationItems).first
               , pos = newOffsetEl.position().left;
 
-            $list.animate({left: -pos});
+            $list.stop(true, false).animate({left: -pos});
+        }
+
+        /**
+         * Меняет первый и последний элементы видимой части списка<br>
+         * Не дает им выйти за рамки слайдера, что бы предотвратить прокрутку за пределы списка.<br>
+         * Используется в rotationList()
+         * @method changeCurrentsItem
+         * @param fIndex {Number} Новый индекс первого элемента
+         * @param visableElNum {Number} Колличество видимых элементов
+         * @param $items {Object} jQuery набор всех элементов списка
+         * @param lastNfirstElObj {Object} Объект, в котором хранятся первый и последний элемент
+         * @param navEl {Object} Объект, содержащий войства:<br>
+         *                       <i>prev</i> - стрелка влево<br>
+         *                       <i>next</i> - стрелка вправо
+         * @returns Возвращает объект со свойствами:<br> 
+         *              <i>first</i> - 1й элемент в видимой области<br>
+         *              <i>last</i> - последний элемент
+         */
+        function changeLastNFirstEl ( fIndex, visableElNum, $items, lastNfirstElObj ) {
+            var first = fIndex < 0 ? 0 : fIndex  // Первый элемент может быть только 0 или больше
+              , newLastIndex = first + visableElNum-1
+              , newFirstIndex = first
+              , newLast
+              , newFirst;
+
+            // Если последний элемент выходит за пределы списка
+            if ( newLastIndex > numItems-1 ) {
+                newLastIndex = numItems-1;
+                newFirstIndex = (numItems-1) - (visableElNum-1);
+                newFirstIndex = newFirstIndex < 0 ? 0 : newFirstIndex; // Если элементов в слайдере меньше видимых элиментов
+            }
+
+
+            console.log('newLastIndex: ', newLastIndex);
+            console.log('numItems-1: ', numItems-1);
+            console.log('(visableElNum-1): ', (visableElNum-1));
+
+            newLast = $items.eq( newLastIndex );
+            newFirst = $items.eq( newFirstIndex );
+
+
+            lastNfirstElObj.first = newFirst;
+            lastNfirstElObj.last = newLast;
+
+            return{
+                  first: newFirst
+                , last: newLast
+            };
         }
 
         return{
