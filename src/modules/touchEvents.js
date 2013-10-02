@@ -20,9 +20,15 @@ define([
           , $reviewItems
           , $reviewWrapper
 
-          , $antiClockDiv
+          , direction
 
-          , direction;
+          , $substrate
+          , tmpSubstrate = '<div id="'+settings.SLIDER_CSS_CLASS+'__substrate" style="'
+                            +'width: 100px;'
+                            +'height: 100px;'
+                            +'position: absolute;'
+                            +'display: none;">'
+                           +'</div>';
 
          
         function init () {
@@ -31,25 +37,22 @@ define([
         }
 
         function updateVars () {
-            $review  = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__list');
-            $reviewItems  = $review.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item');
-            $reviewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow');
+            $frames = $('.'+settings.SLIDER_CSS_CLASS+'__frames', $slider);
+            $framesList  = $('.'+settings.SLIDER_CSS_CLASS+'__frames__list', $frames);
+            $framesItems  = $('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames);
+            $framesWrapper = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames);
             
-            $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview');
-            $previewItems = $preview.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item');
-            $previewWrapper = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow');
+            $preview = $('.'+settings.SLIDER_CSS_CLASS+'__preview', $slider);
+            $previewList = $('.'+settings.SLIDER_CSS_CLASS+'__preview__list', $preview);
+            $previewItems = $('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $preview);
+            $previewWrapper = $('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow', $preview);
             $previewLastEl = $previewItems.eq( $previewItems.last().index()+1 - (settings.visableElements) );
 
             direction = settings.verticalDirection? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
             size = settings.verticalDirection? 'height' : 'width';    // Вертикальный или горизонтальный слайдер
             offset = 0;                                               // Начальное положение списка
-            $('body').append('<div id="noclick" style="'
-                            +'width: 100px;'
-                            +'height: 100px;'
-                            +'position: absolute;'
-                            +'display: none;">'
-                           +'</div>');
-            $antiClockDiv = $('#noclick');
+            $('body').append(tmpSubstrate);
+            $substrate = $('#'+settings.SLIDER_CSS_CLASS+'__substrate');
         }
             
 
@@ -57,22 +60,22 @@ define([
          * Вешает события для тачскринов
          */
         function bindEvents () {
-            $review.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent', 
+            $framesList.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
                        { 
-                           $wrapper: $reviewWrapper, 
-                           $list: $review, 
-                           $items: $reviewItems,
-                           lastBounds: $reviewItems.last().position()[ direction ],
-                           $lastItem: $reviewItems.last(),
+                           $wrapper: $framesWrapper, 
+                           $list: $framesList, 
+                           $items: $framesItems,
+                           lastBounds: $framesItems.last().position()[ direction ],
+                           $lastItem: $framesItems.last(),
                            directFrames: true   // if false -> не меняем активный кадр при перетаскивании мышкой (нужно для слайдов - при перетаскивании меняется активный кадр)
                        }, touchStart);
             
             var margin = settings.verticalDirection? parseInt($previewLastEl.css('marginTop'), 10) : parseInt($previewLastEl.css('marginLeft'), 10);
             
-            $preview.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
+            $previewList.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
                         {
                             $wrapper: $previewWrapper, 
-                            $list: $preview, 
+                            $list: $previewList, 
                             $items: $previewItems,
                             $lastItem: $previewItems.last(),
                             lastBounds: $previewLastEl.position()[ direction ] + margin
@@ -98,7 +101,7 @@ define([
             $(document).on('touchend.slider.touchEvent, mouseup.slider.touchEvent', e.data, touchEnd);
             
             // Добовляем слой, что бы при перетаскивании нелзя было нажать на превью
-            $antiClockDiv.css({left:0,top:0}).show();
+            $substrate.css({left:0,top:0}).show();
 
             slider.stopAutoRatating();
             e.preventDefault();
@@ -108,19 +111,17 @@ define([
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
               , coords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
               , newPosition = coords - e.data.offset
+              , newPositionOffset = settings.verticalDirection ? newPosition-e.data.$wrapper.height() : newPosition-e.data.$wrapper.width()  // Для правильного определения правой границы
               , padding = settings.verticalDirection? e.data.$lastItem.outerHeight() / 2 : e.data.$lastItem.outerWidth() / 2
+              , lastBounds = settings.verticalDirection ? e.data.$list.height() : e.data.$list.width()
               ;
 
             // Перемещаем подложку за мышкой
-            $antiClockDiv.css({
-                left: originalEvent.clientX - 50,
-                top: originalEvent.clientY - 50
-            });
-            
-            e.data.lastBounds = e.data.$list.width(); // Кривой хак для правильного определения границы списка картинок в скрытом слайдере
+            moveSubstrate(originalEvent.clientX, originalEvent.clientY);
 
+            lastBounds = e.data.$list.width()
             if ( newPosition > padding ) { return false; }
-            if ( newPosition < -e.data.lastBounds - padding ) { return false; }
+            if ( newPositionOffset < -lastBounds - padding ) { return false; }
             
             e.data.$list.css(direction, newPosition); // Перемещаем элемент за мышкой, учитывая позицию курсора на элементе
 
@@ -133,14 +134,14 @@ define([
               , position = e.data.$list.position()[ direction ]
               , $middleVisEl = e.data.$items.eq( e.data.$lastItem.index() - (settings.visableElements-1) ) // К этому элементу мы будем подтягивать слайдер, если он выйдет за рамки с правой стороны
               , margin = parseInt($middleVisEl.css('marginLeft'), 10) || parseInt($middleVisEl.css('marginTop'), 10)
-              , positionForRightBound = $middleVisEl.position()[ direction ] + margin
+              , positionForRightBound = settings.verticalDirection? e.data.$list.height()-e.data.$wrapper.height() : e.data.$list.width()-e.data.$wrapper.width()
               , animateObj = {}
               , newPos = null // Новые координаты слайдера
               ;
             
             $(document).off('touchmove.slider.touchEvent, mousemove.slider.touchEvent', touchMove);
             $(document).off('touchend.slider.touchEvent, mouseup.slider.touchEvent', touchEnd);
-            $antiClockDiv.hide();
+            $substrate.hide();
 
             // Если слайды вылезли за границы, то возвращаем их к активному элементу
             if ( e.data.directFrames && !checkBounds(position, e.data.$lastItem, e.data.$wrapper) ) {
@@ -159,6 +160,7 @@ define([
                         
             // Если превью вылезли за правую/нижнюю границу
             if ( position < 0 && !checkBounds(position, e.data.$lastItem, e.data.$wrapper) ) {
+                positionForRightBound = 
                 animateObj[ direction ] = -positionForRightBound;
 
                 e.data.$list.animate(animateObj);
@@ -208,6 +210,28 @@ define([
          */
         function cursorMotionVector (start, end) {
             return start < end ? 'prev' : 'next';
+        }
+
+        /**
+         * Перемещает скрытую подложку и не дает ей выйти за границу экрана
+         * @param x,y {Number} - позиция подложки
+         */
+        function moveSubstrate (x,y) {
+            x = x - 50;
+            y = y - 50;
+
+            if ( x + 100 > $(window).width() ) {
+                x = $(window).width()-100;
+            }
+
+            if ( y + 100 > $(window).height() ) {
+                y = $(window).height()-100;
+            }
+
+            $substrate.css({
+                left: x,
+                top: y
+            });
         }
 
         return{

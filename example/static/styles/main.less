@@ -29,6 +29,7 @@
             overflow: hidden;
             position: relative;
             width: 100%;
+            height: 370px;
         }
         
         &__nav {
@@ -58,9 +59,10 @@
             list-style: none;
             margin: 0;
             padding: 0;
-            width: 99999px;
-            position: relative;
             font-size: 0;
+            position: absolute;
+            white-space: nowrap;
+            height: 100%;
         }
         
         // Сама картинка слайдера
@@ -75,29 +77,18 @@
     
     // Список превью
     &__preview {
-        .disable-select();
-        width: 9999px;
+        padding: 10px 75px;
         position: relative;
-        margin: 0;
-        padding: 0;
-        font-size: 0;
-        letter-spacing: -1px;
+        height: 90px;
         
-        &__wrapper {
-            padding: 10px 75px;
-            position: relative;
-            margin-top: -115px;
-            height: 90px;
-            
-            &__bg {
-                background: #222;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                .opacity(0.5);
-            }
+        &__bg {
+            background: #222;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            .opacity(0.5);
         }
         
         &__overfow {
@@ -107,42 +98,21 @@
             position: relative;
         }
         
-        &__nav {
-            .nav(){
-                .disable-select();
-                display: block;
-                position: absolute;
-                width: 20px;
-                height: 35px;
-                cursor: pointer;
-                z-index: 1;
-                top: 50%;
-                margin-top: -17px;
-            }
-            
-            &__next {
-                .nav();
-                right: 10px;
-                background-position: 100% 0;
-                &.disable {
-                    background-position: 100% 100%;
-                }
-            }
-            
-            &__prev {
-                .nav();
-                left: 10px;
-                &.disable {
-                    background-position: 0 100%;
-                }
-            }
+        &__list {
+            .disable-select();
+            margin: 0;
+            padding: 0;
+            font-size: 0;
+            position: absolute;
+            white-space: nowrap;
+            height: 100%;
         }
+        
         
         // Превью в списке    
         &__item {
             .inline-block();
             font-size: 20px;
-            margin-left: 30px;
             position: relative;
             
             &__border {

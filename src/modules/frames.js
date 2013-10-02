@@ -22,7 +22,7 @@ define([
           , $review
           , $prev
           , $next
-          , direction;
+          , direction
           ;
 
         allElSize *= numItems;
@@ -167,7 +167,7 @@ define([
         return{
               init: init
             , move: move
-        }
+        };
 
     }
 

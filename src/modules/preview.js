@@ -18,10 +18,11 @@ define([
 
         // Элементы управления превью слайдера
         var $preview = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview')
-          , $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow')
-          , $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item')
-          , $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__prev')
-          , $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__next')
+          , $previewList = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__list', $preview)
+          , $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow', $preview)
+          , $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $preview)
+          , $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__prev', $preview)
+          , $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__next', $preview)
           , lastOrFirstRotatorItems = {
               first: $previewItems.eq(0)
             , last: $previewItems.eq( settings.visableElements-1 )
@@ -201,7 +202,7 @@ define([
                 $next.addClass('disable');
             }
 
-            $preview.stop(true, true).animate({
+            $previewList.stop(true, true).animate({
                 left: -positionItem
             });
         }
@@ -239,7 +240,7 @@ define([
                 $next.addClass('disable');
             }
 
-            $preview.stop(true, true).animate({
+            $previewList.stop(true, true).animate({
                 top: -positionItem
             });
         }
