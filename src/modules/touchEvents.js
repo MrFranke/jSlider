@@ -46,7 +46,9 @@ define([
             $previewList = $('.'+settings.SLIDER_CSS_CLASS+'__preview__list', $preview);
             $previewItems = $('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $preview);
             $previewWrapper = $('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow', $preview);
-            $previewLastEl = $previewItems.eq( $previewItems.last().index()+1 - (settings.visableElements) );
+            lastElIndex = $previewItems.last().index()+1 - (settings.preview.visableElements);
+            lastElIndex = lastElIndex  < 0 ? 0 : lastElIndex;
+            $previewLastEl = $previewItems.eq( lastElIndex );
 
             direction = settings.verticalDirection? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
             size = settings.verticalDirection? 'height' : 'width';    // Вертикальный или горизонтальный слайдер
@@ -111,17 +113,17 @@ define([
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
               , coords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
               , newPosition = coords - e.data.offset
-              , newPositionOffset = settings.verticalDirection ? newPosition-e.data.$wrapper.height() : newPosition-e.data.$wrapper.width()  // Для правильного определения правой границы
               , padding = settings.verticalDirection? e.data.$lastItem.outerHeight() / 2 : e.data.$lastItem.outerWidth() / 2
-              , lastBounds = settings.verticalDirection ? e.data.$list.height() : e.data.$list.width()
+              , listWidth = settings.verticalDirection ? e.data.$list.height() : e.data.$list.width()
+              , wrapperSize = settings.verticalDirection ? e.data.$wrapper.height() : e.data.$wrapper.width()
               ;
 
             // Перемещаем подложку за мышкой
             moveSubstrate(originalEvent.clientX, originalEvent.clientY);
-
-            lastBounds = e.data.$list.width()
+            
+            // Проверяем границы слайдера
             if ( newPosition > padding ) { return false; }
-            if ( newPositionOffset < -lastBounds - padding ) { return false; }
+            if ( newPosition < wrapperSize-listWidth-padding ) { return false; }
             
             e.data.$list.css(direction, newPosition); // Перемещаем элемент за мышкой, учитывая позицию курсора на элементе
 
@@ -132,7 +134,7 @@ define([
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
               , endCoords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
               , position = e.data.$list.position()[ direction ]
-              , $middleVisEl = e.data.$items.eq( e.data.$lastItem.index() - (settings.visableElements-1) ) // К этому элементу мы будем подтягивать слайдер, если он выйдет за рамки с правой стороны
+              , $middleVisEl = e.data.$items.eq( e.data.$lastItem.index() - (settings.preview.visableElements-1) ) // К этому элементу мы будем подтягивать слайдер, если он выйдет за рамки с правой стороны
               , margin = parseInt($middleVisEl.css('marginLeft'), 10) || parseInt($middleVisEl.css('marginTop'), 10)
               , positionForRightBound = settings.verticalDirection? e.data.$list.height()-e.data.$wrapper.height() : e.data.$list.width()-e.data.$wrapper.width()
               , animateObj = {}

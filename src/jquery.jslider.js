@@ -8,28 +8,36 @@ function startSlider () {
 
 $.fn.jSlider = function( options ) {
         
-    var settings = $.extend( {
+    var settings = $.extend( true, {
                 SLIDER_CSS_CLASS: 'js-slider' // Класс для слайдера. Если такой класс уже есть, его можно переопределить
               , verticalDirection: false
-              , animation: true  // Анимирует перелистывание картинок
               , autoRatating: false     // Автоматическое перелистывание (принимает значение в миллисекундах)
               , activEl: 1              // Элемент, который будет активным при инициализации слайдера
-              , alignment: !options.verticalDirection // Автоматическое выравниывние элементов (все превью должны быть одинаковы)
-              , review: true
-              , rotator: true
-              , pagination: false
-              , tests: false
-              , touch: true
-              , visableElements: 4  // Колличество видимых \на странице элементов
-              , step: options.verticalDirection ? 1 : 4     // Если вертикальный слайдер, то перематываем на 1 шаг вперед (если не указанно другое)
-              , slideOnLastFirstEl: !options.verticalDirection // Крутит слайдер при нажатии на крайние элементы
-              , maxDiffForImageRotating: 5  // Колличество изображений которое прокручиваетсяс анимацией, если нужно прокрутить больше картинок, то запускается альтернативная анимация
-              , motionlessPreview: false // Если true, то превью не перемещается
-              , resizable: true
+              , pagination: false,
 
+              touch: true,
 
-              , preloadCallback: null // Функция, которая вызывается сразу после инициализации слайдера
-              , changeActiveElCallback: null // Функция, которая вызывается во время смены активного элемента
+              // Стандартные настройки для слайдов
+              frames: {
+                maxDiffForImageRotating: 5,
+                animation: true,
+                elements: {}
+              },
+
+              // Стандартные настройки превью
+              preview: {
+                visableElements: 4, // Колличество видимых превью на странице элементов
+                alignment: !options.verticalDirection,  // Выравнивание превью по ширине видимой области
+                slideOnExtremeEl: !options.verticalDirection, // Перемещение превью при нажатие на крайние элементы
+                dontRotate: false,  // Если true, список превью не будет крутиться
+                step: options.verticalDirection ? 1 : 4,  // На сколько элементов перемещается список превью
+                elements: {}
+              },
+
+              resize: {
+                height: 300,
+                width: 300
+              }
 
         }, options);
 
@@ -52,11 +60,11 @@ $.fn.jSlider = function( options ) {
           ;
 
         // TODO: Придумать более надежную систему подгрузки модулей. 
-        var modules = [settings.review?     '../../../src/modules/frames'     : null,
-                       settings.rotator?    '../../../src/modules/preview'    : null,
+        var modules = [settings.frames?     '../../../src/modules/frames'     : null,
+                       settings.preview?    '../../../src/modules/preview'    : null,
                        settings.pagination? '../../../src/modules/pagination' : null,
                        settings.touch?      '../../../src/modules/touchEvents': null,
-                       settings.tests?      '../../../src/modules/tests'      : null];
+                       settings.resize?     '../../../src/modules/resize'     : null];
 
         // Инициализируем все модули для слайдера
         function init () {
@@ -77,7 +85,7 @@ $.fn.jSlider = function( options ) {
             
             // Подгружает и инициализирует модули слайдера
             require(modules, function () {
-                modules = []; // Перезаписываем массив с модулями, заменяя ссылки на класс модуля
+                //modules = []; // Перезаписываем массив с модулями, заменяя ссылки на класс модуля
                 for (var i = 0; i < arguments.length; i++) {
                     if ( arguments[i] ) {
                         modules.push( new arguments[i]( that ) );
@@ -172,16 +180,31 @@ $.fn.jSlider = function( options ) {
         function checkIndexOverBounds (i) {
             return i >= 0 && i < numItems;
         }
+
+        /**
+         * Выравнивает превью
+         */
+        function alignmentPreview () {
+            $slider.trigger('jSlider.alignmentPreview');
+        }
         
         /**
          * Менет активный элемент
          * @param {Number} Индекс элемента, который нужно сделать активным
          */
         function changeActiveElement ( index ) {
-            if ( !checkIndexOverBounds(index) ) { return false; }     // Если индекс больше колличества картинок, или меньше - ничего не делаем
+            if ( !checkIndexOverBounds(index) ) { return false; }     // Если индекс больше количества картинок, или меньше - ничего не делаем
             $slider.trigger('jSlider.activeElementChanged', [index]);
             settings.activEl = index;
             return this;
+        }
+
+        function next () {
+            changeActiveElement(settings.activEl+1);
+        }
+
+        function prev () {
+            changeActiveElement(settings.activEl-1);
         }
         
         function stopAutoRatating () {
@@ -195,7 +218,7 @@ $.fn.jSlider = function( options ) {
         }
         
 
-        // Запускаем слайдер
+        // Запускаем слайдер после проверки подгрузки всех картинок
         waitingAllImg(init);
 
         // Собирает API для работа со слайдером
@@ -203,6 +226,7 @@ $.fn.jSlider = function( options ) {
               stopAutoRatating  : stopAutoRatating
             , startAutoRatating : startAutoRatating
             , changeActiveElement: changeActiveElement
+            , alignmentPreview: alignmentPreview
             , $slider: $slider
         };
 

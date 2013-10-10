@@ -7,13 +7,14 @@ define([
     function Frames (slider) {
         var $slider = slider.$slider
           , settings = slider.settings
+          , settingsFrames = settings.frames
           ;
 
         $slider.on('jSlider.start', init);
 
         var $frames
-          , $reviewItems
-          , reviewWidth
+          , $framesItems
+          , framesWidth
           , allElSize
           , isVisable
           , numItems
@@ -31,24 +32,40 @@ define([
             updateVars();
             bindEvents();
             
-            if ( $slider.is(':visible') ) {
+            if ( isVisable ) {
                 alignImage();
             }
         }
 
         function updateVars () {
             $frames         = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames');
-            $reviewItems    = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames);
-            $review         = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__list', $frames);
-            $prev           = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__prev', $frames);
-            $next           = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__next', $frames);
-            $firstEl        = $reviewItems.first();
-            reviewWidth     = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
+            $framesItems    = $('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames);
+            $framesList     = $('.'+settings.SLIDER_CSS_CLASS+'__frames__list', $frames);
+            $framesOverflow = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames);
+            $prev           = $('.'+settings.SLIDER_CSS_CLASS+'__frames__prev', $frames);
+            $next           = $('.'+settings.SLIDER_CSS_CLASS+'__frames__next', $frames);
+            $firstEl        = $framesItems.first();
+            framesWidth     = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
             allElSize       = settings.verticalDirection? $firstEl.height() : $firstEl.width();
-            numItems        = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length;
+            numItems        = $('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames).length || $('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $frames).length;
             interval        = false;
             direction       = settings.verticalDirection? 'top' : 'left';
             isVisable       = $slider.is(':visible');
+
+            // Если нет активного элемента, то устанавливаем его сами
+            if ( !$framesItems.filter('active').length ) {
+                $framesItems.eq(settings.activEl).addClass('active');
+            }
+            
+            // Дублируем элементы для использования их в других модулях
+            settings.frames.elements = {
+                $frames        : $frames,
+                $framesItems   : $framesItems,
+                $framesList    : $framesList,
+                $framesOverflow: $framesOverflow,
+                $prev          : $prev,
+                $next          : $next
+            };
         }
 
         function bindEvents () {
@@ -73,8 +90,12 @@ define([
             }
         }
         
+        /**
+         * Ширина каждого слайда равна ширине всего слайдера
+         */
         function alignImage () {
-            $reviewItems.css({width: reviewWidth});
+            framesWidth = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
+            $framesItems.css({width: framesWidth});
         }
 
         /**
@@ -99,7 +120,7 @@ define([
          * @public
          */
         function move ( index ) {
-            var $el = $reviewItems.eq( index )
+            var $el = $framesItems.eq( index )
               , pos = settings.verticalDirection? $el.position().top : $el.position().left
               , diff = Math.abs( index - settings.activEl );
             
@@ -115,26 +136,26 @@ define([
             }
 
 
-            $reviewItems.removeClass('active');
+            $framesItems.removeClass('active');
             $el.addClass('active');
 
             settings.activEl = index;
             settings.activEl = index;
 
             // Если пользователь передал функцию, то выполняем ее вместо стандартной анимации
-            if ( typeof settings.animation === 'function' ) {
-                settings.animation.apply( this, [$review, $el, diff, index] );
+            if ( typeof settingsFrames.animation === 'function' ) {
+                settingsFrames.animation.apply( this, [$framesList, $el, diff, index] );
                 return false;
             }
 
             
             // Если нужно переместить изображение больше чем на 5 слайдев,
             // то не крутим картинки, а скрываем и показываем нужную
-            if ( diff > settings.maxDiffForImageRotating && settings.animation ) {
-                $reviewItems.animate({opacity: 0}, 100, function (){
-                    $review.css(direction, -pos);
+            if ( diff > settingsFrames.maxDiffForImageRotating && settingsFrames.animation ) {
+                $framesItems.animate({opacity: 0}, 100, function (){
+                    $framesList.css(direction, -pos);
                 });
-                $reviewItems.animate({opacity: 1});
+                $framesItems.animate({opacity: 1});
             }else{
                 rotateAnimation(pos);
             }
@@ -149,11 +170,12 @@ define([
             var animateObj = {};
             animateObj[ direction ] = -pos;
             
-            if ( settings.animation ) {
-                $review.stop(true, true);
-                $review.animate(animateObj);
+            if ( settingsFrames.animation ) {
+                $framesList
+                    .stop(true, false)
+                    .animate(animateObj);
             }else{
-                $review.css(animateObj);
+                $framesList.css(animateObj);
             }
         }
 
