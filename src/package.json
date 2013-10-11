@@ -11,7 +11,9 @@
     },
     "bugs": {
     },
-    "dependencies": {
-        "jquery"   : ">1.4.2"
+    "jam": {
+        "dependencies": {
+            "jquery"   : ">1.4.2"
+        }
     }
 }

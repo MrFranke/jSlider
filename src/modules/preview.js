@@ -8,22 +8,17 @@ define([
         var $slider = slider.$slider
           , settings = slider.settings
           , settingsPreview = slider.settings.preview
-          , timeout
-          , indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
-          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length
-          , isVisable = $slider.is(':visible')
-          ;
+          , numItems
 
-        $slider.on('jSlider.start', init);
-
-        // Элементы управления превью слайдера
-        var $preview
+          , $preview
           , $previewList
           , $previewOverflow
           , $previewItems
           , $prev
           , $next
           , extremeItems;
+
+        $slider.on('jSlider.start', init);
          
         function init () {
             updateVars();
@@ -36,7 +31,7 @@ define([
                 normolizeWidth();
             }
 
-            $previewItems.eq( indexActiveItem ).addClass('active');
+            $previewItems.eq( settings.activEl ).addClass('active');
         }
 
         function updateVars () {
@@ -47,6 +42,8 @@ define([
             
             $prev = $('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__prev', $preview);
             $next = $('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__next', $preview);
+
+            numItems = slider.GLOBALS.numItems;
 
             extremeItems = {
                 first: $previewItems.eq(0)

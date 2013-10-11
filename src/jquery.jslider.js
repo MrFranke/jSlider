@@ -9,13 +9,15 @@ function startSlider () {
 $.fn.jSlider = function( options ) {
         
     var settings = $.extend( true, {
-                SLIDER_CSS_CLASS: 'js-slider' // Класс для слайдера. Если такой класс уже есть, его можно переопределить
+                SLIDER_CSS_CLASS: 'js-slider'
               , verticalDirection: false
-              , autoRatating: false     // Автоматическое перелистывание (принимает значение в миллисекундах)
-              , activEl: 1              // Элемент, который будет активным при инициализации слайдера
-              , pagination: false,
+              , autoRatating: false     
+              , activEl: 1              
+              , checkError: !('\v'=='v')
+              , filesPath: '../../../src/modules/',
 
               touch: true,
+              pagination: false,
 
               // Стандартные настройки для слайдов
               frames: {
@@ -37,6 +39,11 @@ $.fn.jSlider = function( options ) {
               resize: {
                 height: 300,
                 width: 300
+              },
+
+              skin: {
+                name: 'standart',
+                path: '../../../src/modules/skins/standart/'
               }
 
         }, options);
@@ -44,70 +51,106 @@ $.fn.jSlider = function( options ) {
 
     // Создаем класс для слайдера
     var Slider = function ( $slider ) {
+        // Первый и последний элементы превью в видимой области и индекс активной картинки
+        var numItems
+          , isVisable
+          , errorImages = []
+          , that = this
 
-        var that = this;
+          // TODO: Придумать более надежную систему подгрузки модулей с возможностью передавать разные параметры для модулей
+          , modules = [settings.frames?     settings.filesPath+'/frames'     : null,
+                       settings.preview?    settings.filesPath+'/preview'    : null,
+                       settings.touch?      settings.filesPath+'/touchEvents': null,
+                       
+                       settings.pagination? settings.filesPath+'/pagination' : null,
+                       settings.resize?     settings.filesPath+'/resize'     : null,
+                       settings.skin?       settings.filesPath+'/skins'      : null];
+
         this.settings = settings;
         this.$slider = $slider;
-
         this.changeActiveElement = changeActiveElement;
         this.stopAutoRatating = stopAutoRatating;
+        this.GLOBALS = GLOBALS = {}; // Глобальные переменные для всех модулей
 
-        // Первый и последний элементы превью в видимой области и индекс активной картинки
-        var numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'_review_item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'_preview_item').length
-          , isVisable = $slider.is(':visible')
-          , isInit = false
-          , errorImages = []
-          ;
+        initModules(init);
+        // Инициализируем нужные модули слайдера и запускает его
+        function initModules ( callback ) {
+            // Подгружает и инициализирует модули слайдера
+            require(modules, function () {
+                modules = [];
+                
+                for (var i = 0; i < arguments.length; i++) {
+                    
+                    if ( arguments[i] ) {
+                        var module = new arguments[i]( that );
+                        modules.push( module );
+                    }
+                }
+                
+                callback();
+            });
+        }
 
-        // TODO: Придумать более надежную систему подгрузки модулей. 
-        var modules = [settings.frames?     '../../../src/modules/frames'     : null,
-                       settings.preview?    '../../../src/modules/preview'    : null,
-                       settings.pagination? '../../../src/modules/pagination' : null,
-                       settings.touch?      '../../../src/modules/touchEvents': null,
-                       settings.resize?     '../../../src/modules/resize'     : null];
-
-        // Инициализируем все модули для слайдера
+        /**
+         * Если подключены шаблоны, то сначало парсим шаблон, а потом запускаем работу слайдера
+         */
         function init () {
-            // Удаляем все картинки с ошибками
+            if ( settings.skin ) {
+                $slider.trigger('jSlider.deploy', [function () {
+                    checkImg();
+                }]);
+            }else{
+                checkImg();
+            }
+        }
+
+        function checkImg () {
+            if ( settings.checkError ) {
+                waitingAllImg(start);
+            }else{
+                start();
+            }
+        }
+
+        function start () {
+            removeImgWithError();
+            updateVars();
+            
+            // Включает листалку
+            if ( settings.autoRatating ) {
+                autoRatating( settings.autoRatating );
+            }
+
+            // TODO: если слайдер скрыт, неправильно считает положение всего списка (список уезжает вверх)
+            if ( isVisable ) {
+                changeActiveElement( settings.activEl-1 );
+            }
+
+            $slider.trigger('jSlider.start', [this]);
+        }
+
+        function updateVars () {
+            GLOBALS.numItems = numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length ||
+                                          $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length;
+            GLOBALS.isVisable = isVisable = $slider.is(':visible');
+        }
+
+        // Удаляем все картинки с ошибками
+        function removeImgWithError () {
             var index, $prev, $rev;
             
             for (var i = 0; i < errorImages.length; i++) {
-                index = errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length  ? 
-                        errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').index() : 
+                index = errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length  ?
+                        errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__frames__item').index() :
                         errorImages[i].parents('.'+settings.SLIDER_CSS_CLASS+'__preview__item').index();
                 $rev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item:eq('+index+')');
                 $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item:eq('+index+')');
                 
                 remove( $rev, $prev );
             }
-            
-            numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length;
-            
-            // Подгружает и инициализирует модули слайдера
-            require(modules, function () {
-                //modules = []; // Перезаписываем массив с модулями, заменяя ссылки на класс модуля
-                for (var i = 0; i < arguments.length; i++) {
-                    if ( arguments[i] ) {
-                        modules.push( new arguments[i]( that ) );
-                    }
-                }
-
-                // Включает листалку
-                if ( settings.autoRatating ) {
-                    autoRatating( settings.autoRatating );
-                }
-
-                // TODO: если слайдер скрыт, неправильно считает положение всего списка (список уезжает вверх)
-                if ( isVisable ) {
-                    changeActiveElement( settings.activEl-1 );
-                }
-
-                if ( settings.preloadCallback ) { settings.preloadCallback($slider); }
-                // Это событие запускает инициализацию всех модулей
-                $slider.trigger('jSlider.start', [this]);
-            });
-
         }
+
+        // Обработка ошибок
         $slider.on('jSlider.loadImage', function (e, error, counter, errorImages) {
             //console.log(error, ' ', counter);
         });
@@ -216,10 +259,6 @@ $.fn.jSlider = function( options ) {
             $slider.trigger('jSlider.startAutoRatating', [dalay]);
             return this;
         }
-        
-
-        // Запускаем слайдер после проверки подгрузки всех картинок
-        waitingAllImg(init);
 
         // Собирает API для работа со слайдером
         var API = {
@@ -232,7 +271,7 @@ $.fn.jSlider = function( options ) {
 
         return API;
 
-    }
+    };
 
     var setOfSlider = new APIStack; // Массив из возвращаемых слайдеров 
 
