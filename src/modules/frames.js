@@ -5,6 +5,7 @@ define([
 ) {
 
     function Frames (slider) {
+        
         var $slider = slider.$slider
           , settings = slider.settings
           , settingsFrames = settings.frames
@@ -18,7 +19,6 @@ define([
           , allElSize
           , isVisable
           , numItems
-          , interval
           , $firstEl
           , $review
           , $prev
@@ -47,8 +47,7 @@ define([
             $firstEl        = $framesItems.first();
             framesWidth     = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
             allElSize       = settings.verticalDirection? $firstEl.height() : $firstEl.width();
-            numItems        = $('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames).length || $('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $frames).length;
-            interval        = false;
+            numItems        = slider.GLOBALS.numItems;
             direction       = settings.verticalDirection? 'top' : 'left';
             isVisable       = $slider.is(':visible');
 
@@ -66,6 +65,12 @@ define([
                 $prev          : $prev,
                 $next          : $next
             };
+
+            if ( numItems <= 1 ) {
+                $prev.hide();
+                $next.hide();
+            }
+
         }
 
         function bindEvents () {
@@ -176,13 +181,6 @@ define([
                     .animate(animateObj);
             }else{
                 $framesList.css(animateObj);
-            }
-        }
-
-        function stopAutoRatating () {
-            if ( interval ) {
-                clearInterval(interval);
-                return true;
             }
         }
 

@@ -1,19 +1,24 @@
 {
-    "name": "jslider",
-    "version": "2.0.1",
-    "description": "Universal slider on jQuery",
-    "keywords": [ "slider", "jquery plugin", "carousel" ],
-    "main": "jquery.jslider.js",
-    "author": {
-        "name": "Moskalev Mikhail"
-    },
-    "repository": {
-    },
-    "bugs": {
-    },
-    "jam": {
-        "dependencies": {
-            "jquery"   : ">1.4.2"
-        }
+  "name": "jslider",
+  "version": "2.0.1",
+  "description": "Universal slider on jQuery",
+  "keywords": [
+    "slider",
+    "jquery plugin",
+    "carousel"
+  ],
+  "main": "jquery.jslider.js",
+  "author": {
+    "name": "Moskalev Mikhail"
+  },
+  "repository": {},
+  "bugs": {},
+  "jam": {
+    "dependencies": {
+      "jquery": ">1.4.2"
     }
+  },
+  "devDependencies": {
+    "grunt-contrib-requirejs": "~0.4.1"
+  }
 }

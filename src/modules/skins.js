@@ -1,9 +1,15 @@
 define([
     'jquery',
-    'jslider/skins/standart'
+
+    '../skins/standart/main',
 ], function(
-    $
+    $,
+    standart
 ) {
+
+    var tmpClass
+      , args = arguments
+      , skinsMap = { standart: standart }; // Карта, для соотношения конструкторов скинов и аргументов
 
     function Skins ( slider ) {
         var $slider = slider.$slider
@@ -11,14 +17,14 @@ define([
 
         $slider.on('jSlider.deploy', init);
 
-        function init (e, callback) {
-            console.log('deploy with skin: ', skin.name);
-            attachFiles();
-            callback();
+        function init (e, done) {
+            choiceSkin();
+            done();
         }
 
-        function attachFiles () {
-            
+        function choiceSkin () {
+            skin.obj = new skinsMap[ skin.name ]( $slider );
+            console.log(skin.obj);
         }
 
         return {

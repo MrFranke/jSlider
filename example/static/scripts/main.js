@@ -1,6 +1,6 @@
 require([
     'jquery',
-    '../../../src/jquery.jslider'
+    'jquery.jslider'
 ], function($, jSlider) {
     $('.slider').jSlider({
         preview: {

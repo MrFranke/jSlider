@@ -1,18 +1,29 @@
-if ( typeof define === 'function' ) {
-    define(['jquery'], function($) {startSlider();});
-}else{
-    startSlider();
-}
+define([
+    'jquery',
+    '../../../src/modules/frames',
+    '../../../src/modules/preview',
+    '../../../src/modules/touchEvents',
+    '../../../src/modules/pagination',
+    '../../../src/modules/resize',
+    '../../../src/modules/skins',
 
-function startSlider () {
+], function(
+    $,
+    Frames,
+    Preview,
+    TouchEvents,
+    Pagination,
+    Resize,
+    Skins
+) {
 
 $.fn.jSlider = function( options ) {
-        
+
     var settings = $.extend( true, {
                 SLIDER_CSS_CLASS: 'js-slider'
               , verticalDirection: false
-              , autoRatating: false     
-              , activEl: 1              
+              , autoRatating: false
+              , activEl: 1
               , checkError: !('\v'=='v')
               , filesPath: '../../../src/modules/',
 
@@ -43,7 +54,7 @@ $.fn.jSlider = function( options ) {
 
               skin: {
                 name: 'standart',
-                path: '../../../src/modules/skins/standart/'
+                path: '../../../src/modules/skins/'
               }
 
         }, options);
@@ -55,16 +66,7 @@ $.fn.jSlider = function( options ) {
         var numItems
           , isVisable
           , errorImages = []
-          , that = this
-
-          // TODO: Придумать более надежную систему подгрузки модулей с возможностью передавать разные параметры для модулей
-          , modules = [settings.frames?     settings.filesPath+'/frames'     : null,
-                       settings.preview?    settings.filesPath+'/preview'    : null,
-                       settings.touch?      settings.filesPath+'/touchEvents': null,
-                       
-                       settings.pagination? settings.filesPath+'/pagination' : null,
-                       settings.resize?     settings.filesPath+'/resize'     : null,
-                       settings.skin?       settings.filesPath+'/skins'      : null];
+          , modules = [];
 
         this.settings = settings;
         this.$slider = $slider;
@@ -72,23 +74,28 @@ $.fn.jSlider = function( options ) {
         this.stopAutoRatating = stopAutoRatating;
         this.GLOBALS = GLOBALS = {}; // Глобальные переменные для всех модулей
 
-        initModules(init);
         // Инициализируем нужные модули слайдера и запускает его
-        function initModules ( callback ) {
-            // Подгружает и инициализирует модули слайдера
-            require(modules, function () {
-                modules = [];
-                
-                for (var i = 0; i < arguments.length; i++) {
-                    
-                    if ( arguments[i] ) {
-                        var module = new arguments[i]( that );
-                        modules.push( module );
-                    }
-                }
-                
-                callback();
-            });
+        function initModules (that) {
+            if ( settings.frames ) {
+                new Frames(that);
+            }
+            if ( settings.preview ) {
+                new Preview(that);
+            }
+            if ( settings.touch ) {
+                new TouchEvents(that);
+            }
+            if ( settings.pagination ) {
+                new Pagination(that);
+            }
+            if ( settings.resize ) {
+                new Resize(that);
+            }
+            if ( settings.skin ) {
+                new Skins(that);
+            }
+
+            init();
         }
 
         /**
@@ -269,6 +276,8 @@ $.fn.jSlider = function( options ) {
             , $slider: $slider
         };
 
+        initModules(this);
+
         return API;
 
     };
@@ -286,22 +295,21 @@ $.fn.jSlider = function( options ) {
 };
 
 
-    /**
-     * Функция для поиска API для нужного слайдера.
-     * @param $slider {Object} Объект jQuery или DOMNode элемент
-     */
-    function getCurrentAPI ( $slider ) {
-        var slider = $slider.get? $slider.get(0) : $slider;
-        for (var i = 0; i < this.length; i++) {
-            if ( this[i].$el.get(0) === slider ) {
-                return this[i];
-            }
+/**
+ * Функция для поиска API для нужного слайдера.
+ * @param $slider {Object} Объект jQuery или DOMNode элемент
+ */
+function getCurrentAPI ( $slider ) {
+    var slider = $slider.get? $slider.get(0) : $slider;
+    for (var i = 0; i < this.length; i++) {
+        if ( this[i].$el.get(0) === slider ) {
+            return this[i];
         }
-        return null;
     }
-
-    // Объект для хранения всех API слайдеров
-    APIStack = function () {this.getCurrentAPI = getCurrentAPI;};
-    APIStack.prototype = Array.prototype;
-
+    return null;
 }
+
+// Объект для хранения всех API слайдеров
+APIStack = function () {this.getCurrentAPI = getCurrentAPI;};
+    APIStack.prototype = Array.prototype;
+});

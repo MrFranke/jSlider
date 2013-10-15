@@ -59,6 +59,11 @@ define([
             if ( !$previewItems.filter('active').length ) {
                 $previewItems.eq(settings.activEl).addClass('active');
             }
+
+            // Если картинок <= 1 скрываем превью
+            if ( numItems <= 1 ) {
+                $preview.hide();
+            }
         }
 
         function bindEvents () {
