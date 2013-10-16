@@ -14,7 +14,45 @@ jSlider
 
 **jSlider рассчитан на поддержку**: IE7+, Chrome, FF, Opera.
 
-**Список модулей:**
+### Быстрый деплой:
+**html:**
+```html
+<div class="js-slider">
+      <!--Список со всеми слайдами-->
+      <ul class="js-slider__frames__list">
+          <li><img src="http://fpoimg.com/650x360?text=1"></li>
+          <li><img src="http://fpoimg.com/650x360?text=2"></li>
+          <li><img src="http://fpoimg.com/650x360?text=3"></li>
+          <li><img src="http://fpoimg.com/650x360?text=4"></li>
+          <li><img src="http://fpoimg.com/650x360?text=5"></li>
+          <li><img src="http://fpoimg.com/650x360?text=6"></li>
+          <li><img src="http://fpoimg.com/650x360?text=7"></li>
+      </ul>
+      <!--Список со всеми превью-->
+      <ul class="js-slider__preview__list">
+          <li><img src="http://fpoimg.com/105x90?text=1"></li>
+          <li><img src="http://fpoimg.com/105x90?text=2"></li>
+          <li><img src="http://fpoimg.com/105x90?text=3"></li>
+          <li><img src="http://fpoimg.com/105x90?text=4"></li>
+          <li><img src="http://fpoimg.com/105x90?text=5"></li>
+          <li><img src="http://fpoimg.com/105x90?text=6"></li>
+          <li><img src="http://fpoimg.com/105x90?text=7"></li>
+      </ul>
+  </div>
+```
+**javascript:**
+```javascript
+require([
+    'jquery',
+    'jquery.jslider'
+], function($, jSlider) {
+    $('.js-slider').jSlider({
+        skin: 'standart'
+    });
+});
+```
+
+### Список модулей:
 * [Frames](https://github.com/MrFranke/jSlider/wiki/Frames) - кадры слайдера. Нужны для обображения полноразмерных фотографий.
 * [Preview](#) - превью для слайдера. Нужны для упрощения навигации по слайдера
 * [Pagination](#) - пагинация для слайдера. Нужна для дублирования превью.
