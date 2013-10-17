@@ -54,7 +54,7 @@ require([
 
 ### Список модулей:
 * [Frames](https://github.com/MrFranke/jSlider/wiki/Frames) - кадры слайдера. Нужны для обображения полноразмерных фотографий.
-* [Preview](#) - превью для слайдера. Нужны для упрощения навигации по слайдера
-* [Pagination](#) - пагинация для слайдера. Нужна для дублирования превью.
-* [touchEvents](#) - модуль, позволяющий управлять кадрами и превью слайдера с помощью свайпа.
+* [Preview](https://github.com/MrFranke/jSlider/wiki/Preview) - превью для слайдера. Нужны для упрощения навигации по слайдера
+* [Pagination](https://github.com/MrFranke/jSlider/wiki/Pagination) - пагинация для слайдера. Нужна для дублирования превью.
+* [touch](https://github.com/MrFranke/jSlider/wiki/Touch) - модуль, позволяющий управлять кадрами и превью слайдера с помощью свайпа.
 * [skins](https://github.com/MrFranke/jSlider/wiki/Skins) - этот модуль отвечает за шаблоны стлайдера
