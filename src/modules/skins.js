@@ -2,14 +2,20 @@ define([
     'jquery',
 
     '../skins/standart/main',
+    '../skins/simple/main',
+    '../skins/small/main'
 ], function(
     $,
-    standart
+    standart,
+    simple,
+    small
 ) {
 
     var tmpClass
       , args = arguments
-      , skinsMap = { standart: standart }; // Карта, для соотношения конструкторов скинов и аргументов
+      , skinsMap = { standart: standart,
+                     simple  : simple,
+                     small   : small  }; // Карта, для соотношения конструкторов скинов и аргументов
 
     function Skins ( slider ) {
         var $slider = slider.$slider
@@ -18,13 +24,15 @@ define([
         $slider.on('jSlider.deploy', init);
 
         function init (e, done) {
-            choiceSkin();
-            done();
-        }
+            // Если вместо параметров шаблона передали имя, превращаем его в объект
+            if ( typeof skin === 'string' ) {
+                slider.settings.skin = skin = {name: skin, done: done};
+            }
 
-        function choiceSkin () {
-            skin.obj = new skinsMap[ skin.name ]( $slider );
-            console.log(skin.obj);
+            // Если нету функции done, то добавляем ее
+            slider.settings.skin.done = slider.settings.skin.done? slider.settings.skin.done : done;
+
+            skin.obj = new skinsMap[ skin.name ]( slider );
         }
 
         return {

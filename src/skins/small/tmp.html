@@ -1,0 +1,17 @@
+<div class="slider--<%=skinName%>"> <!-- Оболочка для модифицированных стилей слайдера -->
+    <style><%= style %></style>    
+    <div class="slider__preview js-slider__preview">
+        <div class="slider__preview__bg"></div>
+        
+        <div class="slider__preview__overfow js-slider__preview__overflow">
+            <ul class="slider__preview__list js-slider__preview__list">                  
+                <% for (var i = 0; i < previews.length; i++) { %>
+                    <li class="slider__preview__item js-slider__preview__item">
+                        <div class="slider__preview__item__border"></div>
+                        <%= previews[i] %>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div> <!-- slider__preview__wrapper -->
+</div>

@@ -1,7 +1,3 @@
-/**
- * Стандартный шаблон для слайдера.
- * Содержит превью и слайды. Включены touch события и выравнивание превью с 4мя видимыми элементами
- */
 define([
     'jquery',
     'text!./main.css',
@@ -14,12 +10,21 @@ define([
     prototype
 ) {
     
-    function Standart ( slider ) {
+    function Standart ( slider, done ) {
         this.style = styles;
         this.tmp = tmp;
         this.slider = slider;
         
+        changeSettings();
+        
         this.deploy();
+
+        function changeSettings () {
+            var settings = slider.settings;
+            settings.frames = false;
+
+            settings.preview.alignment = false;
+        }
     }
 
     Standart.prototype = new prototype;

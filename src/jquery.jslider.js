@@ -2,7 +2,7 @@ define([
     'jquery',
     '../../../src/modules/frames',
     '../../../src/modules/preview',
-    '../../../src/modules/touchEvents',
+    '../../../src/modules/touch',
     '../../../src/modules/pagination',
     '../../../src/modules/resize',
     '../../../src/modules/skins',
@@ -24,11 +24,14 @@ $.fn.jSlider = function( options ) {
               , verticalDirection: false
               , autoRatating: false
               , activEl: 1
-              , checkError: !('\v'=='v')
-              , filesPath: '../../../src/modules/',
+              , checkError: !('\v'=='v'),
 
-              touch: true,
               pagination: false,
+
+              touch: {
+                frames: true,
+                previews: true
+              },
 
               // Стандартные настройки для слайдов
               frames: {
@@ -48,7 +51,7 @@ $.fn.jSlider = function( options ) {
               },
 
               resize: {
-                height: 300,
+                height: 200,
                 width: 300
               },
 
@@ -66,16 +69,18 @@ $.fn.jSlider = function( options ) {
         var numItems
           , isVisable
           , errorImages = []
-          , modules = [];
+          , modules = []
+          , that = this;
 
         this.settings = settings;
         this.$slider = $slider;
+        $slider = this.$slider;
         this.changeActiveElement = changeActiveElement;
         this.stopAutoRatating = stopAutoRatating;
         this.GLOBALS = GLOBALS = {}; // Глобальные переменные для всех модулей
 
         // Инициализируем нужные модули слайдера и запускает его
-        function initModules (that) {
+        function initModules () {
             if ( settings.frames ) {
                 new Frames(that);
             }
@@ -91,22 +96,21 @@ $.fn.jSlider = function( options ) {
             if ( settings.resize ) {
                 new Resize(that);
             }
-            if ( settings.skin ) {
-                new Skins(that);
-            }
-
-            init();
         }
 
         /**
-         * Если подключены шаблоны, то сначало парсим шаблон, а потом запускаем работу слайдера
+         * Если подключены шаблоны, то сначало обрабатываем модуль с шаблонами, а после создания шаблонов запускаем все остальные модули
+         *
          */
         function init () {
             if ( settings.skin ) {
+                new Skins(that);
                 $slider.trigger('jSlider.deploy', [function () {
+                    initModules();
                     checkImg();
                 }]);
             }else{
+                initModules();
                 checkImg();
             }
         }
@@ -230,13 +234,6 @@ $.fn.jSlider = function( options ) {
         function checkIndexOverBounds (i) {
             return i >= 0 && i < numItems;
         }
-
-        /**
-         * Выравнивает превью
-         */
-        function alignmentPreview () {
-            $slider.trigger('jSlider.alignmentPreview');
-        }
         
         /**
          * Менет активный элемент
@@ -263,6 +260,7 @@ $.fn.jSlider = function( options ) {
         }
 
         function startAutoRatating ( dalay ) {
+            dalay = dalay? dalay : 1000;
             $slider.trigger('jSlider.startAutoRatating', [dalay]);
             return this;
         }
@@ -272,11 +270,12 @@ $.fn.jSlider = function( options ) {
               stopAutoRatating  : stopAutoRatating
             , startAutoRatating : startAutoRatating
             , changeActiveElement: changeActiveElement
-            , alignmentPreview: alignmentPreview
+            , next: next
+            , prev: prev
             , $slider: $slider
         };
 
-        initModules(this);
+        init();
 
         return API;
 
