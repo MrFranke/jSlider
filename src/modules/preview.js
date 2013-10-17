@@ -25,7 +25,7 @@ define([
             bindEvents();
 
             // Выравнивание элементов превью по ширине видимой области
-            if ( settingsPreview.alignment && !settings.verticalDirection ){
+            if ( settingsPreview.alignment && !settings.vertical ){
                 alignmentItems();
             }else{
                 normolizeWidth();
@@ -42,6 +42,15 @@ define([
             
             $prev = $('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__prev', $preview);
             $next = $('.'+settings.SLIDER_CSS_CLASS+'__preview__nav__next', $preview);
+
+            settings.preview.elements = {
+                $preview         : $preview,
+                $previewList     : $previewList,
+                $previewItems    : $previewItems,
+                $previewOverflow : $previewOverflow,
+                $prev            : $prev,
+                $next            : $next
+            };
 
             numItems = slider.GLOBALS.numItems;
 
@@ -217,7 +226,7 @@ define([
               , diff = f-i; // То, на сколько нужно прокрутить превью, что бы активный элемент был виден 
 
             if ( i >= l || i <= f ) {
-                if (settings.verticalDirection) {
+                if (settings.vertical) {
                     move( -diff );
                     return;
                 }
@@ -234,7 +243,7 @@ define([
          */
         function move ( step ) {
             if ( settingsPreview.dontRotate ) { return false; }
-            if ( settings.verticalDirection ) {
+            if ( settings.vertical ) {
                 moveVertical( step );
             } else {
                 moveHorizontal( step );

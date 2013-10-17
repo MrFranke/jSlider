@@ -46,9 +46,9 @@ define([
             $next           = $('.'+settings.SLIDER_CSS_CLASS+'__frames__next', $frames);
             $firstEl        = $framesItems.first();
             framesWidth     = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
-            allElSize       = settings.verticalDirection? $firstEl.height() : $firstEl.width();
+            allElSize       = settings.vertical? $firstEl.height() : $firstEl.width();
             numItems        = slider.GLOBALS.numItems;
-            direction       = settings.verticalDirection? 'top' : 'left';
+            direction       = settings.vertical? 'top' : 'left';
             isVisable       = $slider.is(':visible');
 
             // Если нет активного элемента, то устанавливаем его сами
@@ -126,7 +126,7 @@ define([
          */
         function move ( index ) {
             var $el = $framesItems.eq( index )
-              , pos = settings.verticalDirection? $el.position().top : $el.position().left
+              , pos = settings.vertical? $el.position().top : $el.position().left
               , diff = Math.abs( index - settings.activEl );
             
 

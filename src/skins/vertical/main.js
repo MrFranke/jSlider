@@ -1,3 +1,6 @@
+/**
+ * Вертикальный слайдер
+ */
 define([
     'jquery',
     'text!./main.css',
@@ -10,19 +13,17 @@ define([
     prototype
 ) {
     
-    function Standart ( slider, done ) {
+    function Standart ( slider ) {
         this.style = styles;
         this.tmp = tmp;
         this.slider = slider;
-        
-        changeSettings();
-        
+        chsngeSettings();
         this.deploy();
 
-        function changeSettings () {
+        function chsngeSettings () {
             var settings = slider.settings;
-            settings.frames = false;
-            settings.preview.alignment = false;
+
+            settings.vertical = true;
         }
     }
 

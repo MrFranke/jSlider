@@ -21,7 +21,7 @@ $.fn.jSlider = function( options ) {
 
     var settings = $.extend( true, {
                 SLIDER_CSS_CLASS: 'js-slider'
-              , verticalDirection: false
+              , vertical: false
               , autoRatating: false
               , activEl: 1
               , checkError: !('\v'=='v'),
@@ -43,10 +43,10 @@ $.fn.jSlider = function( options ) {
               // Стандартные настройки превью
               preview: {
                 visableElements: 4, // Колличество видимых превью на странице элементов
-                alignment: !options.verticalDirection,  // Выравнивание превью по ширине видимой области
-                slideOnExtremeEl: !options.verticalDirection, // Перемещение превью при нажатие на крайние элементы
+                alignment: !options.vertical,  // Выравнивание превью по ширине видимой области
+                slideOnExtremeEl: !options.vertical, // Перемещение превью при нажатие на крайние элементы
                 dontRotate: false,  // Если true, список превью не будет крутиться
-                step: options.verticalDirection ? 1 : 4,  // На сколько элементов перемещается список превью
+                step: options.vertical ? 1 : 4,  // На сколько элементов перемещается список превью
                 elements: {}
               },
 

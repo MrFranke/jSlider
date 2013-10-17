@@ -3,6 +3,6 @@ require([
     'jquery.jslider'
 ], function($, jSlider) {
     $('.js-slider').jSlider({
-        skin: 'standart'
+        skin: 'vertical'
     });
 });

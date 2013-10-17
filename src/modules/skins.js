@@ -3,19 +3,22 @@ define([
 
     '../skins/standart/main',
     '../skins/simple/main',
-    '../skins/small/main'
+    '../skins/small/main',
+    '../skins/vertical/main',
 ], function(
     $,
     standart,
     simple,
-    small
+    small,
+    vertical
 ) {
 
     var tmpClass
       , args = arguments
       , skinsMap = { standart: standart,
                      simple  : simple,
-                     small   : small  }; // Карта, для соотношения конструкторов скинов и аргументов
+                     small   : small,
+                     vertical: vertical }; // Карта, для соотношения конструкторов скинов и аргументов
 
     function Skins ( slider ) {
         var $slider = slider.$slider

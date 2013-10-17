@@ -25,7 +25,8 @@ define([
             tmp = _.template(this.tmp, { style   : this.style,
                                          frames  : frames,
                                          previews: previews,
-                                         skinName: this.slider.settings.skin.name });
+                                         skinName: this.slider.settings.skin.name,
+                                         data    : this.dataForTmp });
 
             this.slider.$slider.html(tmp);
             this.slider.settings.skin.done();

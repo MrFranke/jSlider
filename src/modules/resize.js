@@ -10,9 +10,9 @@ define([
           , settings = slider.settings
           , settingsResize = settings.resize
 
-          , $frameItems
-          , $frameOverflow
-          , $frameList
+          , $framesItems
+          , $framesOverflow
+          , $framesList
 
           , previewOverflowWidth
           , $previewItems
@@ -28,18 +28,18 @@ define([
         function init () {
             updateVars();
             bindEvents();
-            frames();
+            if ( slider.settings.frames ) {frames();}
         }
 
         function updateVars () {
-            $frameItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__item');
-            $frameOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow');
-            $frameList = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__frames__list');
-            frameWidth = $frameOverflow.width();
+            $framesItems = settings.frames.elements.$framesItems;
+            $framesOverflow = settings.frames.elements.$framesOverflow;
+            $framesList = settings.frames.elements.$framesList;
+            frameWidth = $framesOverflow.width();
 
-            $previewItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item');
-            $previewOverflow = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow');
-            $previewList = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__list');
+            $previewItems = settings.preview.elements.$previewItems;
+            $previewList = settings.preview.elements.$previewList;
+            $previewOverflow = settings.preview.elements.$previewOverflow;
             previewOverflowWidth = $previewOverflow.width();
 
             windowWidth = $(window).width();
@@ -50,7 +50,7 @@ define([
                 $slider.css({minWidth: settingsResize.width});
             }
             if ( settingsResize.height ) {
-                $frameOverflow.css({minHeight: settingsResize.height});
+                $framesOverflow.css({minHeight: settingsResize.height});
             }
         }
 
@@ -61,29 +61,30 @@ define([
         function resize (e) {
             clearTimeout(timeout);
             timeout = setTimeout(reload, 100);
-            frames(e);
-            preview(e);
+            
+            if ( slider.settings.frames ) {frames(e);}
+            if ( slider.settings.previews ) {preview(e);}
         }
 
         /**
          * Ресайзит слайды и не дает слайду вылезти за пределы экрана
          */
         function frames (e) {
-            frameWidth = $frameOverflow.width();
-            var offset = $frameItems.eq(slider.settings.activEl).position()
+            frameWidth = $framesOverflow.width();
+            var offset = $framesItems.eq(slider.settings.activEl).position()
               , position = offset[direction]
-              , newHeight = $frameItems.first().find('img').height();
+              , newHeight = $framesItems.first().find('img').height();
 
 
             if ( settingsResize.width ) {
-                $frameItems.css({width: frameWidth});
+                $framesItems.css({width: frameWidth});
             }
 
             if ( settingsResize.height ) {
-                $frameOverflow.css({height: newHeight});
+                $framesOverflow.css({height: newHeight});
             }
 
-            $frameList.css(direction, -position); // Недает сдвигаться элементу относительно видимой обасти при ресайзе
+            $framesList.css(direction, -position); // Недает сдвигаться элементу относительно видимой обасти при ресайзе
         }
 
         /**

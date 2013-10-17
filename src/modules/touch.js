@@ -13,7 +13,7 @@ define([
 
         var $preview
           , $previewItems
-          , $previewWrapper
+          , $previewOverflow
           , $prevLastEl
 
           , $review
@@ -35,27 +35,27 @@ define([
             updateVars();
 
             // Запускаем события только для тех модулей, которые подключенны
-            if ( slider.settings.touch.frames ) {framesInit();}
-            if ( slider.settings.touch.preview ) {previewInit();}
+            if ( slider.settings.frames && slider.settings.touch.frames ) {framesInit();}
+            if ( slider.settings.preview && slider.settings.touch.previews ) {previewInit();}
         }
 
         function updateVars () {
-            direction = settings.verticalDirection? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
-            size = settings.verticalDirection? 'height' : 'width';    // Вертикальный или горизонтальный слайдер
+            direction = settings.vertical? 'top' : 'left';   // Вертикальный или горизонтальный слайдер
+            size = settings.vertical? 'height' : 'width';    // Вертикальный или горизонтальный слайдер
             offset = 0;                                               // Начальное положение списка
             $('body').append(tmpSubstrate);
             $substrate = $('#'+settings.SLIDER_CSS_CLASS+'__substrate');
         }
 
         function framesInit () {
-            $frames = $('.'+settings.SLIDER_CSS_CLASS+'__frames', $slider);
-            $framesList  = $('.'+settings.SLIDER_CSS_CLASS+'__frames__list', $frames);
-            $framesItems  = $('.'+settings.SLIDER_CSS_CLASS+'__frames__item', $frames);
-            $framesWrapper = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames);
+            $frames = settings.frames.elements.$frames;
+            $framesList = settings.frames.elements.$framesList;
+            $framesItems = settings.frames.elements.$framesItems;
+            $framesOverflow = settings.frames.elements.$framesOverflow;
 
             $framesList.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
                        { 
-                           $wrapper: $framesWrapper, 
+                           $wrapper: $framesOverflow, 
                            $list: $framesList, 
                            $items: $framesItems,
                            lastBounds: $framesItems.last().position()[ direction ],
@@ -66,20 +66,21 @@ define([
 
         function previewInit () {
             var margin;
+            
+            $preview = settings.preview.elements.$preview;
+            $previewList = settings.preview.elements.$previewList;
+            $previewItems = settings.preview.elements.$previewItems;
+            $previewOverflow = settings.preview.elements.$previewOverflow;
 
-            $preview = $('.'+settings.SLIDER_CSS_CLASS+'__preview', $slider);
-            $previewList = $('.'+settings.SLIDER_CSS_CLASS+'__preview__list', $preview);
-            $previewItems = $('.'+settings.SLIDER_CSS_CLASS+'__preview__item', $preview);
-            $previewWrapper = $('.'+settings.SLIDER_CSS_CLASS+'__preview__overflow', $preview);
             lastElIndex = $previewItems.last().index()+1 - (settings.preview.visableElements);
             lastElIndex = lastElIndex  < 0 ? 0 : lastElIndex;
             $previewLastEl = $previewItems.eq( lastElIndex );
-            margin = settings.verticalDirection? parseInt($previewLastEl.css('marginTop'), 10) : parseInt($previewLastEl.css('marginLeft'), 10);
+            margin = settings.vertical? parseInt($previewLastEl.css('marginTop'), 10) : parseInt($previewLastEl.css('marginLeft'), 10);
 
             $previewList.on('touchstart.slider.touchEvent, mousedown.slider.touchEvent',
                         {
-                            $wrapper: $previewWrapper, 
-                            $list: $previewList, 
+                            $wrapper: $previewOverflow,
+                            $list: $previewList,
                             $items: $previewItems,
                             $lastItem: $previewItems.last(),
                             lastBounds: $previewLastEl.position()[ direction ] + margin
@@ -88,7 +89,7 @@ define([
 
         function touchStart (e) {
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-              , startCoords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
+              , startCoords = settings.vertical? originalEvent.clientY : originalEvent.clientX
               , listPosition = e.data.$list.position()[ direction ]
               , cursorOffset = startCoords - listPosition; // Узнаем позицию относительно элемента, который нужно перемещать
               
@@ -113,11 +114,11 @@ define([
 
         function touchMove ( e ) {
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-              , coords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
+              , coords = settings.vertical? originalEvent.clientY : originalEvent.clientX
               , newPosition = coords - e.data.offset
-              , padding = settings.verticalDirection? e.data.$lastItem.outerHeight() / 2 : e.data.$lastItem.outerWidth() / 2
-              , listWidth = settings.verticalDirection ? e.data.$list.height() : e.data.$list.width()
-              , wrapperSize = settings.verticalDirection ? e.data.$wrapper.height() : e.data.$wrapper.width()
+              , padding = settings.vertical? e.data.$lastItem.outerHeight() / 2 : e.data.$lastItem.outerWidth() / 2
+              , listWidth = settings.vertical ? e.data.$list.height() : e.data.$list.width()
+              , wrapperSize = settings.vertical ? e.data.$wrapper.height() : e.data.$wrapper.width()
               ;
 
             // Перемещаем подложку за мышкой
@@ -134,11 +135,11 @@ define([
 
         function touchEnd (e) {
             var originalEvent = e.originalEvent.changedTouches ? e.originalEvent.changedTouches['0'] : e.originalEvent
-              , endCoords = settings.verticalDirection? originalEvent.clientY : originalEvent.clientX
+              , endCoords = settings.vertical? originalEvent.clientY : originalEvent.clientX
               , position = e.data.$list.position()[ direction ]
               , $middleVisEl = e.data.$items.eq( e.data.$lastItem.index() - (settings.preview.visableElements-1) ) // К этому элементу мы будем подтягивать слайдер, если он выйдет за рамки с правой стороны
               , margin = parseInt($middleVisEl.css('marginLeft'), 10) || parseInt($middleVisEl.css('marginTop'), 10)
-              , positionForRightBound = settings.verticalDirection? e.data.$list.height()-e.data.$wrapper.height() : e.data.$list.width()-e.data.$wrapper.width()
+              , positionForRightBound = settings.vertical? e.data.$list.height()-e.data.$wrapper.height() : e.data.$list.width()-e.data.$wrapper.width()
               , animateObj = {}
               , newPos = null // Новые координаты слайдера
               ;
@@ -185,13 +186,14 @@ define([
          * Проверяет переданные координаты на соответствие границам.
          */
         function checkBounds ( coords, $item, $wrapper ) {
-            var size = settings.verticalDirection? $item.last().outerHeight() : $item.last().outerWidth()
-              , margin = settings.verticalDirection? $item.last().css('marginTop') : $item.last().css('marginLeft')
-              , position = $item.position()[ direction ];
+            var size = settings.vertical? $item.last().outerHeight() : $item.last().outerWidth()
+              , margin = settings.vertical? $item.last().css('marginTop') : $item.last().css('marginLeft')
+              , position = $item.position()[ direction ]
+              , wrapperSize = settings.vertical? $wrapper.height() : $wrapper.width();
             coords *= -1;
             margin = parseInt(margin, 10);
             // находим границу слайдераs
-            var bound = ( position + size + margin ) - $wrapper.width();
+            var bound = ( position + size + margin ) - wrapperSize;
             if ( coords < 0 ) { return false; }
             if ( coords > bound ) { return false; }
             return true;

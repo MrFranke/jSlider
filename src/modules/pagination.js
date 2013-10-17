@@ -214,11 +214,6 @@ define([
                 newFirstIndex = newFirstIndex < 0 ? 0 : newFirstIndex; // Если элементов в слайдере меньше видимых элиментов
             }
 
-
-            console.log('newLastIndex: ', newLastIndex);
-            console.log('numItems-1: ', numItems-1);
-            console.log('(visableElNum-1): ', (visableElNum-1));
-
             newLast = $items.eq( newLastIndex );
             newFirst = $items.eq( newFirstIndex );
 
