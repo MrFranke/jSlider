@@ -37,6 +37,24 @@ $('.js-slider').jSlider({
 });
 ```
 
+При инициализации слайдер возвращает оъект с API:
+```javascript
+var API = $('.js-slider').jSlider();
+API.next();
+```
+
+**Объект API**:
+```javascript
+{
+      stopAutoRatating  : stopAutoRatating 
+    , startAutoRatating : startAutoRatating // Запускает автоматическую смену кадров можно передать задержку вразения в ms
+    , changeActiveElement: changeActiveElement // Меняет индекс активного элемента на переданных
+    , next: next // Перелистывает на следующий кадр
+    , prev: prev // Перелистывает на предыдущий
+    , $slider: $slider // Это jquery обхект слайдера
+}
+```
+
 ### Быстрый деплой:
 **html:**
 ```html
