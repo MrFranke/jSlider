@@ -15,8 +15,9 @@ define([
 
         var $frames
           , $framesItems
+          , $framesList
+          , $framesOverflow
           , framesWidth
-          , allElSize
           , isVisable
           , numItems
           , $firstEl
@@ -25,8 +26,6 @@ define([
           , $next
           , direction
           ;
-
-        allElSize *= numItems;
          
         function init () {
             updateVars();
@@ -45,11 +44,10 @@ define([
             $prev           = $('.'+settings.SLIDER_CSS_CLASS+'__frames__prev', $frames);
             $next           = $('.'+settings.SLIDER_CSS_CLASS+'__frames__next', $frames);
             $firstEl        = $framesItems.first();
-            framesWidth     = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
-            allElSize       = settings.vertical? $firstEl.height() : $firstEl.width();
+            framesWidth     = $framesOverflow.width();
             numItems        = slider.GLOBALS.numItems;
             direction       = settings.vertical? 'top' : 'left';
-            isVisable       = $slider.is(':visible');
+            isVisable       = slider.GLOBALS.isVisable;
 
             // Если нет активного элемента, то устанавливаем его сами
             if ( !$framesItems.filter('active').length ) {
@@ -99,7 +97,7 @@ define([
          * Ширина каждого слайда равна ширине всего слайдера
          */
         function alignImage () {
-            framesWidth = $('.'+settings.SLIDER_CSS_CLASS+'__frames__overflow', $frames).width();
+            framesWidth = $framesOverflow.width();
             $framesItems.css({width: framesWidth});
         }
 

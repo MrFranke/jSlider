@@ -13,14 +13,13 @@ define([
       $slider.on('jSlider.start', init);
         
         var indexActiveItem = settings.activEl - 1 < 0 ? 0 : settings.activEl - 1
-          , numItems = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__review__item').length || $slider.find('.'+settings.SLIDER_CSS_CLASS+'__preview__item').length
-          , isVisable = $slider.is(':visible')
-          ;
-
-        var $prev
-          , $next
-          , $list
+          , numItems
+          , isVisable
+          , $pagination
           , $items
+          , $list
+          , $prev
+          , $next
           , $overflow
           , numVisableEl
           , lastOrFirstPaginationItems = {};
@@ -31,16 +30,7 @@ define([
          * @private
          */
         function init () {
-            var $htmlPagination = $slider.find( '.'+settings.SLIDER_CSS_CLASS+'__pagination__list' );
-
-            if ( $htmlPagination.length ) {
-                $htmlPagination.empty(); // Если пагинация уже была созданна, отчищаем ее
-                $htmlPagination.append( createPaginationTmp('list') );
-
-            }else{
-                $slider.prepend( createPaginationTmp() );
-            }
-            updateVars();
+            updateVars();            
             bindEvent();
         }
         
@@ -63,11 +53,25 @@ define([
         }
 
         function updateVars () {
-            $prev = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__prev');
-            $next = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__next');
-            $list = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__list');
-            $items = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__item');
-            $overflow = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__overflow');
+            numItems  = slider.GLOBALS.numItems;
+            isVisable = slider.GLOBALS.isVisable;
+
+            $pagination = $slider.find('.'+settings.SLIDER_CSS_CLASS+'__pagination__list');
+
+            if ( $pagination.length ) {
+                $pagination.empty(); // Если пагинация уже была созданна, отчищаем ее
+                $pagination.append( createPaginationTmp('list') );
+
+            }else{
+                $slider.prepend( createPaginationTmp() );
+                $pagination = $slider.find( '.'+settings.SLIDER_CSS_CLASS+'__pagination__list');
+            }
+
+            $prev = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__prev', $pagination);
+            $next = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__nav__next', $pagination);
+            $overflow = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__overflow', $pagination);
+            $list = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__list', $pagination);
+            $items = $('.'+settings.SLIDER_CSS_CLASS+'__pagination__item', $pagination);
 
             lastOrFirstPaginationItems = searchVisableEl();
         }
@@ -110,8 +114,7 @@ define([
          * @returns $lastItem {Object} jQuery объект. Последний видимый элемент
          */
         function searchVisableEl () {
-            var itemsLength = $items.length
-              , $item = $items.eq( itemsLength > 1 ? 1 : 0 )
+            var $item = $items.eq( numItems > 1 ? 1 : 0 )
               , margin = parseInt( $item.css('marginLeft'), 10) + parseInt( $item.css('marginRight'), 10)
               , itemWidth = $item.width() + margin
               , paginatorWidth = $overflow.width()

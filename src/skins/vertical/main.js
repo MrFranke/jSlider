@@ -21,9 +21,7 @@ define([
         this.deploy();
 
         function chsngeSettings () {
-            var settings = slider.settings;
-
-            settings.vertical = true;
+            slider.settings.vertical = true;
         }
     }
 

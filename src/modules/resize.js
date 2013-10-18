@@ -32,25 +32,30 @@ define([
         }
 
         function updateVars () {
-            $framesItems = settings.frames.elements.$framesItems;
-            $framesOverflow = settings.frames.elements.$framesOverflow;
-            $framesList = settings.frames.elements.$framesList;
-            frameWidth = $framesOverflow.width();
-
-            $previewItems = settings.preview.elements.$previewItems;
-            $previewList = settings.preview.elements.$previewList;
-            $previewOverflow = settings.preview.elements.$previewOverflow;
-            previewOverflowWidth = $previewOverflow.width();
-
             windowWidth = $(window).width();
-            direction = settings.verticalDirection? 'top' : 'left';
+            direction = settings.vertical? 'top' : 'left';
+
+            if ( slider.settings.previews ) {
+                $previewItems = settings.preview.elements.$previewItems;
+                $previewList = settings.preview.elements.$previewList;
+                $previewOverflow = settings.preview.elements.$previewOverflow;
+                previewOverflowWidth = $previewOverflow.width();
+            }
+
+            if ( slider.settings.frames ) {
+                $framesItems = settings.frames.elements.$framesItems;
+                $framesOverflow = settings.frames.elements.$framesOverflow;
+                $framesList = settings.frames.elements.$framesList;
+                frameWidth = $framesOverflow.width();
+
+                if ( settingsResize.height ) {
+                    $framesOverflow.css({minHeight: settingsResize.height});
+                }
+            }
 
             // Устанавливаем минимальные размеры окна
             if ( settingsResize.width ) {
                 $slider.css({minWidth: settingsResize.width});
-            }
-            if ( settingsResize.height ) {
-                $framesOverflow.css({minHeight: settingsResize.height});
             }
         }
 
@@ -84,6 +89,7 @@ define([
                 $framesOverflow.css({height: newHeight});
             }
 
+            
             $framesList.css(direction, -position); // Недает сдвигаться элементу относительно видимой обасти при ресайзе
         }
 
@@ -100,10 +106,11 @@ define([
          */
         function reload () {
             slider.changeActiveElement( settings.activEl );
-            windowWidth = $(window).width();
 
-            if ( $previewList.width() < $previewOverflow.width() ) {
-                $previewOverflow.css({width: $previewList.width()});
+            if ( slider.settings.previews ) {
+                if ( $previewList.width() < $previewOverflow.width() ) {
+                  $previewOverflow.css({width: $previewList.width()});
+                }
             }
         }
         

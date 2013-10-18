@@ -1,33 +1,30 @@
 <div class="slider--<%=skinName%>"> <!-- Оболочка для модифицированных стилей слайдера -->
     <style><%= style %></style>
 
-    <div class="slider__frames js-slider__frames">
-        <div class="slider__frames__nav--prev js-slider__frames__prev"></div>
-        <div class="slider__frames__nav--next js-slider__frames__next "></div>
-        
-        <div class="slider__frames__overflow js-slider__frames__overflow">
-            <ul class="slider__frames__list js-slider__frames__list">
+    <div class="slider--<%=skinName%>__frames js-slider__frames">        
+        <div class="slider--<%=skinName%>__frames__overflow js-slider__frames__overflow">
+            <ul class="slider--<%=skinName%>__frames__list js-slider__frames__list">
                 <% for (var i = 0; i < frames.length; i++) { %>
-                    <li class="slider__frames__item js-slider__frames__item">
+                    <li class="slider--<%=skinName%>__frames__item js-slider__frames__item">
                         <%= frames[i] %>
-                        <span class="js-slider__frames__item__fullscreen slider__frames__item__fullscreen"></span>
+                        <span class="js-slider__frames__item__fullscreen slider--<%=skinName%>__frames__item__fullscreen"></span>
                     </li>
                 <% } %>
             </ul>
         </div>
     </div> <!-- slider__frames -->
     
-    <div class="slider__preview js-slider__preview">
-        <div class="slider__preview__bg"></div>
+    <div class="slider--<%=skinName%>__preview js-slider__preview">
+        <div class="slider--<%=skinName%>__preview__bg"></div>
     
-        <div class="slider__preview__nav__prev js-slider__preview__nav__prev"></div>
-        <div class="slider__preview__nav__next js-slider__preview__nav__next"></div>
+        <div class="slider--<%=skinName%>__preview__nav__prev js-slider__preview__nav__prev"></div>
+        <div class="slider--<%=skinName%>__preview__nav__next js-slider__preview__nav__next"></div>
         
-        <div class="slider__preview__overfow js-slider__preview__overflow">
-            <ul class="slider__preview__list js-slider__preview__list">                  
+        <div class="slider--<%=skinName%>__preview__overfow js-slider__preview__overflow">
+            <ul class="slider--<%=skinName%>__preview__list js-slider__preview__list">                  
                 <% for (var i = 0; i < previews.length; i++) { %>
-                    <li class="slider__preview__item js-slider__preview__item">
-                        <div class="slider__preview__item__border"></div>
+                    <li class="slider--<%=skinName%>__preview__item js-slider__preview__item">
+                        <div class="slider--<%=skinName%>__preview__item__border"></div>
                         <%= previews[i] %>
                     </li>
                 <% } %>

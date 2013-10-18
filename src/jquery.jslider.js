@@ -70,7 +70,8 @@ $.fn.jSlider = function( options ) {
           , isVisable
           , errorImages = []
           , modules = []
-          , that = this;
+          , that = this
+          , GLOBALS;
 
         this.settings = settings;
         this.$slider = $slider;
